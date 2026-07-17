@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockFlow B2B - Nền tảng kết nối Người Bán & Người Mua</title>
+    <style>
+        :root {
+            --primary-green: #27ae60;
+            --light-blue: #ebf5fb;
+            --dark-gray: #333;
+            --light-gray: #f5f6fa;
+            --white: #ffffff;
+            --border-color: #dcdde1;
+        }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+        /* Thanh điều hướng */
+        header.navbar {
+            background-color: var(--white);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-green);
+            text-decoration: none;
+        }
+        .tagline { font-size: 14px; color: #7f8c8d; margin-left: 10px; }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+        }
+        .tab {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: var(--light-blue);
+            transition: all 0.3s;
+        }
+        .tab.active {
+            background-color: var(--primary-green);
+            color: white;
+        }
+
+        /* Các style chung từ hai trang */
+        .page-header { text-align: center; margin: 40px 0; }
+        .page-header h1 { color: var(--primary-green); }
+
+        .card {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+        }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group.full-width { grid-column: 1 / -1; }
+        label { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        input[type="text"], input[type="number"], input[type="date"], select, textarea {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        input[type="file"] { padding: 10px 0; }
+
+        .image-preview-container {
+            width: 200px; height: 200px;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: #fafafa;
+            margin-top: 5px;
+        }
+        #imagePreview { width: 100%; height: 100%; object-fit: cover; }
+
+        .listing-preview-image-box {
+            width: 100%; height: 250px;
+            background-color: #f5f6fa;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        button.btn-submit {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        /* Buyer styles */
+        .filter-section {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .filter-section select, .filter-section input {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            flex: 1;
+            min-width: 200px;
+        }
+        .filter-section button {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        @media (max-width: 900px) { .listings-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .listings-grid { grid-template-columns: 1fr; } }
+
+        .listing-card {
+            background-color: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            border-top: 4px solid var(--primary-green);
+        }
+        .listing-card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 16px;
+            height: 45px;
+            overflow: hidden;
+        }
+        .listing-card p {
+            margin: 4px 0;
+            font-size: 13px;
+        }
+        .category-tag {
+            font-size: 11px;
+            color: #7f8c8d;
+            font-style: italic;
+            margin-bottom: 8px;
+        }
+        .status-badge {
+            background-color: #e8f8f5;
+            color: #117a65;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .btn-buy {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+        .btn-buy:hover {
+            background-color: #219a52;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* How it works */
+        .how-it-works { margin-top: 50px; padding-top: 20px; border-top: 2px solid var(--border-color); }
+        .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center; }
+        @media (max-width: 768px) { .steps { grid-template-columns: 1fr 1fr; } }
+        .step-box {
+            background: var(--white);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .step-num {
+            background: var(--primary-green);
+            color: white;
+            width: 30px; height: 30px;
+            line-height: 30px;
+            border-radius: 50%;
+            margin: 0 auto 10px auto;
+            font-weight: bold;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div>
+            <a href="#" class="logo">StockFlow B2B</a>
+            <span class="tagline">Biến hàng dư thành nguồn cung hữu ích.</span>
+        </div>
+        <div class="tabs">
+            <div class="tab active" id="tab-seller" onclick="switchTab('seller')">Người Bán</div>
+            <div class="tab" id="tab-buyer" onclick="switchTab('buyer')">Người Mua</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- ==================== TRANG NGƯỜI BÁN ==================== -->
+        <div id="seller-page">
+            <div class="page-header">
+                <h1>Đăng lượng hàng doanh nghiệp bạn muốn bán</h1>
+                <p>Bạn chỉ cần đăng số lượng hàng muốn bán, không cần công khai toàn bộ tồn kho.</p>
+            </div>
+
+            <div class="card">
+                <form id="seller-form">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="productImage">Ảnh sản phẩm</label>
+                            <input type="file" id="productImage" accept="image/jpeg,image/png,image/webp">
+                            <div class="image-preview-container">
+                                <span id="formPlaceholderText">Chưa có ảnh sản phẩm</span>
+                                <img id="imagePreview" src="" alt="Ảnh xem trước" style="display:none;">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tên doanh nghiệp (*)</label>
+                            <input type="text" id="companyName" required placeholder="VD: Công ty TNHH ABC">
+                        </div>
+                        <div class="form-group">
+                            <label>Tên sản phẩm (*)</label>
+                            <input type="text" id="productName" required placeholder="VD: Thùng carton 40x30x30">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Danh mục sản phẩm (*)</label>
+                            <select id="category" required>
+                                <option value="">-- Chọn danh mục --</option>
+                                <option value="Bao bì và vật tư đóng gói">Bao bì và vật tư đóng gói</option>
+                                <option value="Vải và phụ liệu may mặc">Vải và phụ liệu may mặc</option>
+                                <option value="Nông sản khô và thực phẩm đóng gói">Nông sản khô và thực phẩm đóng gói</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Khu vực lưu kho (*)</label>
+                            <select id="location" required>
+                                <option value="">-- Chọn khu vực --</option>
+                                <option value="TP.HCM">TP.HCM</option>
+                                <option value="Bình Dương">Bình Dương</option>
+                                <option value="Đồng Nai">Đồng Nai</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Số lượng muốn bán (*)</label>
+                            <input type="number" id="quantity" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Đơn vị tính (*)</label>
+                            <input type="text" id="unit" required placeholder="Thùng, kg, mét...">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Giá bán (VNĐ)</label>
+                            <input type="number" id="price" placeholder="Để trống nếu thỏa thuận">
+                        </div>
+                        <div class="form-group">
+                            <label>Tình trạng hàng</label>
+                            <input type="text" id="condition" placeholder="Mới 100%, lưu kho 3 tháng...">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ngày sản xuất</label>
+                            <input type="date" id="mfgDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Hạn sử dụng</label>
+                            <input type="date" id="expDate">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label>Mô tả ngắn</label>
+                            <textarea id="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group full-width checkbox-group">
+                            <input type="checkbox" id="confirm" required>
+                            <label for="confirm">Tôi xác nhận thông tin lô hàng là chính xác.</label>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <button type="submit" class="btn-submit">Đăng hàng</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Preview -->
+            <div class="card" id="preview-section" style="display:none;">
+                <h2 style="color: var(--primary-green);">✅ Listing đã được tạo!</h2>
+                <div style="background:#fff; padding:20px; border-radius:8px; border:1px solid var(--border-color);">
+                    <div class="listing-preview-image-box">
+                        <span id="cardPlaceholderText">Chưa có ảnh</span>
+                        <img id="cardPreviewImage" src="" style="display:none; width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <h3 id="preview-title">Tên sản phẩm</h3>
+                    <p><strong>Số lượng:</strong> <span id="preview-qty"></span></p>
+                    <p><strong>Giá:</strong> <span id="preview-price"></span></p>
+                    <p><strong>Khu vực:</strong> <span id="preview-location"></span></p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Chờ xác minh</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TRANG NGƯỜI MUA ==================== -->
+        <div id="buyer-page" style="display:none;">
+            <div class="page-header">
+                <h1>Tìm nguồn hàng phù hợp trong khu vực</h1>
+                <p>Khám phá các lô hàng dư thương mại được thanh lý trực tiếp từ nhà máy.</p>
+            </div>
+
+            <div class="filter-section">
+                <select id="filter-category">
+                    <option value="all">Tất cả danh mục</option>
+                    <option value="Bao bì">Bao bì và vật tư đóng gói</option>
+                    <option value="Vải">Vải và phụ liệu may mặc</option>
+                    <option value="Thực phẩm">Nông sản khô và thực phẩm đóng gói</option>
+                </select>
+                <select id="filter-location">
+                    <option value="all">Tất cả khu vực</option>
+                    <option value="TP.HCM">TP.HCM</option>
+                    <option value="Bình Dương">Bình Dương</option>
+                    <option value="Đồng Nai">Đồng Nai</option>
+                </select>
+                <input type="text" id="filter-keyword" placeholder="Nhập tên sản phẩm...">
+                <button onclick="filterListings()">Tìm kiếm</button>
+            </div>
+
+            <div class="listings-grid" id="listings-container">
+                
+                <!-- DANH MỤC: BAO BÌ VÀ VẬT TƯ ĐÓNG GÓI -->
+                <div class="listing-card" data-category="Bao bì" data-location="Bình Dương" data-name="Thùng carton">
+                    <h3>Thùng carton 40 × 30 × 30 cm</h3>
+                    <div class="category-tag">Bao bì và vật tư đóng gói</div>
+                    <p><strong>Số lượng:</strong> 10.000 thùng</p>
+                    <p><strong>Giá:</strong> 4.200 VNĐ/thùng</p>
+                    <p><strong>Khu vực:</strong> Dĩ An, Bình Dương</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Đã xác minh</span></p>
+                    <button class="btn-buy" onclick="openModal('Thùng carton 40 × 30 × 30 cm')">Gửi yêu cầu mua</button>
+                </div>
+
+                <div class="listing-card" data-category="Bao bì" data-location="Đồng Nai" data-name="Túi giấy kraft">
+                    <h3>Túi giấy kraft đáy đứng</h3>
+                    <div class="category-tag">Bao bì và vật tư đóng gói</div>
+                    <p><strong>Số lượng:</strong> 8.000 túi</p>
+                    <p><strong>Giá:</strong> 2.500 VNĐ/túi</p>
+                    <p><strong>Khu vực:</strong> Long Thành, Đồng Nai</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Chứng từ đầy đủ</span></p>
+                    <button class="btn-buy" onclick="openModal('Túi giấy kraft đáy đứng')">Gửi yêu cầu mua</button>
+                </div>
+
+                <div class="listing-card" data-category="Bao bì" data-location="TP.HCM" data-name="Màng co PE quấn pallet">
+                    <h3>Màng co PE quấn pallet (Lõi 500g)</h3>
+                    <div class="category-tag">Bao bì và vật tư đóng gói</div>
+                    <p><strong>Số lượng:</strong> 600 cuộn</p>
+                    <p><strong>Giá:</strong> 85.000 VNĐ/cuộn</p>
+                    <p><strong>Khu vực:</strong> Quận 12, TP.HCM</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Đã xác minh</span></p>
+                    <button class="btn-buy" onclick="openModal('Màng co PE quấn pallet')">Gửi yêu cầu mua</button>
+                </div>
+
+                <div class="listing-card" data-category="Bao bì" data-location="Bình Dương" data-name="Băng keo trong OP">
+                    <h3>Băng keo trong OP công nghiệp 4.8cm</h3>
+                    <div class="category-tag">Bao bì và vật tư đóng gói</div>
+                    <p><strong>Số lượng:</strong> 2.500 cuộn</p>
+                    <p><strong>Giá:</strong> 12.500 VNĐ/cuộn</p>
+                    <p><strong>Khu vực:</strong> Thuận An, Bình Dương</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Đã xác minh</span></p>
+                    <button class="btn-buy" onclick="openModal('Băng keo trong OP công nghiệp')">Gửi yêu cầu mua</button>
+                </div>
+
+                <div class="listing-card" data-category="Bao bì" data-location="Đồng Nai" data-name="Chai nhựa PET 500ml">
+                    <h3>Chai nhựa PET trong suốt 500ml</h3>
+                    <div class="category-tag">Bao bì và vật tư đóng gói</div>
+                    <p><strong>Số lượng:</strong> 15.000 chai</p>
+                    <p><strong>Giá:</strong> 1.800 VNĐ/chai</p>
+                    <p><strong>Khu vực:</strong> Nhơn Trạch, Đồng Nai</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Hàng mới 100%</span></p>
+                    <button class="btn-buy" onclick="openModal('Chai nhựa PET trong suốt 500ml')">Gửi yêu cầu mua</button>
+                </div>
+
+                <!-- DANH MỤC: VẢI VÀ PHỤ LIỆU MAY MẶC -->
+                <div class="listing-card" data-category="Vải" data-location="TP.HCM" data-name="Vải cotton màu be">
+                    <h3>Vải cotton màu be cuộn</h3>
+                    <div class="category-tag">Vải và phụ liệu may mặc</div>
+                    <p><strong>Số lượng:</strong> 2.000 mét</p>
+                    <p><strong>Giá:</strong> Thỏa thuận</p>
+                    <p><strong>Khu vực:</strong> Tân Bình, TP.HCM</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Đã kiểm tra</span></p>
+                    <button class="btn-buy" onclick="openModal('Vải cotton màu be cuộn')">Gửi yêu cầu mua</button>
+                </div>
+
+                <div class="listing-card" data-category="Vải" data-location="Bình Dương" data-name="Dây kéo may mặc">
+                    <h3>Dây kéo Nylon khóa giọt nước</h3>
+                    <div class="category-tag">Vải và phụ liệu may mặc</div>
+                    <p><strong>Số lượng:</strong> 20.000 chiếc</p>
+                    <p><strong>Giá:</strong> 1.200 VNĐ/chiếc</p>
+                    <p><strong>Khu vực:</strong> Bến Cát, Bình Dương</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Đã xác minh</span></p>
+                    <button class="btn-buy" onclick="openModal('Dây kéo Nylon khóa giọt nước')">Gửi yêu cầu mua</button>
+                </div>
+
+                <div class="listing-card" data-category="Vải" data-location="TP.HCM" data-name="Vải thun Interlock">
+                    <h3>Vải thun Interlock màu trắng sữa</h3>
+                    <div class="category-tag">Vải và phụ liệu may mặc</div>
+                    <p><strong>Số lượng:</strong> 1.500 kg</p>
+                    <p><strong>Giá:</strong> 75.000 VNĐ/kg</p>
+                    <p><strong>Khu vực:</strong> Bình Tân, TP.HCM</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Đã xác minh</span></p>
+                    <button class="btn-buy" onclick="openModal('Vải thun Interlock màu trắng sữa')">Gửi yêu cầu mua</button>
+                </div>
+
+                <div class="listing-card" data-category="Vải" data-location="Đồng Nai" data-name="Chỉ may công nghiệp">
+                    <h3>Chỉ may công nghiệp 100% Polyester</h3>
+                    <div class="category-tag">Vải và phụ liệu may mặc</div>
+                    <p><strong>Số lượng:</strong> 5.000 cuộn</p>
+                    <p><strong>Giá:</strong> 8.500 VNĐ/cuộn</p>
+                    <p><strong>Khu vực:</strong> Biên Hòa, Đồng Nai</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Chứng từ đầy đủ</span></p>
+                    <button class="btn-buy" onclick="openModal('Chỉ may công nghiệp Polyester')">Gửi yêu cầu mua</button>
+                </div>
+
+                <div class="listing-card" data-category="Vải" data-location="Bình Dương" data-name="Nút áo nhựa 4 lỗ">
+                    <h3>Nút áo nhựa sơ mi 4 lỗ (Trắng/Đen)</h3>
+                    <div class="category-tag">Vải và phụ liệu may mặc</div>
+                    <p><strong>Số lượng:</strong> 50.000 chiếc</p>
+                    <p><strong>Giá:</strong> 350 VNĐ/chiếc</p>
+                    <p><strong>Khu vực:</strong> Tân Uyên, Bình Dương</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Hàng tồn kho mới</span></p>
+                    <button class="btn-buy" onclick="openModal('Nút áo nhựa sơ mi 4 lỗ')">Gửi yêu cầu mua</button>
+                </div>
+
+                <!-- DANH MỤC: NÔNG SẢN KHÔ VÀ THỰC PHẨM ĐÓNG GÓI -->
+                <div class="listing-card" data-category="Thực phẩm" data-location="TP.HCM" data-name="Cà phê rang đóng gói">
+                    <h3>Cà phê Robusta rang xay nguyên chất</h3>
+                    <div class="category-tag">Nông sản khô và thực phẩm đóng gói</div>
+                    <p><strong>Số lượng:</strong> 500 kg</p>
+                    <p><strong>Giá:</strong> 120.000 VNĐ/kg</p>
+                    <p><strong>Khu vực:</strong> Thủ Đức, TP.HCM</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Hạn dùng 8 tháng</span></p>
+                    <button class="btn-buy" onclick="openModal('Cà phê Robusta rang xay')">Gửi yêu cầu mua</button>
+                </div>
+
+                <div class="listing-card" data-category="Thực phẩm" data-location="Đồng Nai" data-name="Hạt điều đóng gói">
+                    <h3>Hạt điều rang muối đóng gói 500g</h3>
+                    <div class="category-tag">Nông sản khô và thực phẩm đóng gói</div>
+                    <p><strong>Số lượng:</strong> 300 kg</p>
+                    <p><strong>Giá:</strong> Thỏa thuận</p>
+                    <p><strong>Khu vực:</strong> Long Khánh, Đồng Nai</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Hạn dùng 10 tháng</span></p>
+                    <button class="btn-buy" onclick="openModal('Hạt điều rang muối đóng gói')">Gửi yêu cầu mua</button>
+                </div>
+
+                <div class="listing-card" data-category="Thực phẩm" data-location="TP.HCM" data-name="Gạo lứt huyết rồng">
+                    <h3>Gạo lứt huyết rồng đóng túi hút chân không</h3>
+                    <div class="category-tag">Nông sản khô và thực phẩm đóng gói</div>
+                    <p><strong>Số lượng:</strong> 2.000 túi (1kg)</p>
+                    <p><strong>Giá:</strong> 28.000 VNĐ/túi</p>
+                    <p><strong>Khu vực:</strong> Bình Chánh, TP.HCM</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Hạn dùng 9 tháng</span></p>
+                    <button class="btn-buy" onclick="openModal('Gạo lứt huyết rồng đóng túi')">Gửi yêu cầu mua</button>
+                </div>
+
+                <div class="listing-card" data-category="Thực phẩm" data-location="Bình Dương" data-name="Trà xanh Thái Nguyên">
+                    <h3>Trà xanh Thái Nguyên sấy khô xuất khẩu</h3>
+                    <div class="category-tag">Nông sản khô và thực phẩm đóng gói</div>
+                    <p><strong>Số lượng:</strong> 800 kg</p>
+                    <p><strong>Giá:</strong> 150.000 VNĐ/kg</p>
+                    <p><strong>Khu vực:</strong> Thủ Dầu Một, Bình Dương</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Hạn dùng 12 tháng</span></p>
+                    <button class="btn-buy" onclick="openModal('Trà xanh Thái Nguyên sấy khô')">Gửi yêu cầu mua</button>
+                </div>
+
+                <div class="listing-card" data-category="Thực phẩm" data-location="Đồng Nai" data-name="Tiêu đen hạt">
+                    <h3>Tiêu đen hạt Xuân Lộc sấy khô</h3>
+                    <div class="category-tag">Nông sản khô và thực phẩm đóng gói</div>
+                    <p><strong>Số lượng:</strong> 1.200 kg</p>
+                    <p><strong>Giá:</strong> 98.000 VNĐ/kg</p>
+                    <p><strong>Khu vực:</strong> Xuân Lộc, Đồng Nai</p>
+                    <p><strong>Trạng thái:</strong> <span class="status-badge">Mới thu hoạch</span></p>
+                    <button class="btn-buy" onclick="openModal('Tiêu đen hạt Xuân Lộc')">Gửi yêu cầu mua</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CÁCH HOẠT ĐỘNG (chung) -->
+        <div class="how-it-works">
+            <h2 style="text-align:center; color:var(--primary-green);">StockFlow hoạt động như thế nào?</h2>
+            <div class="steps">
+                <div class="step-box"><div class="step-num">1</div><p>Seller đăng lượng hàng</p></div>
+                <div class="step-box"><div class="step-num">2</div><p>StockFlow kiểm tra</p></div>
+                <div class="step-box"><div class="step-num">3</div><p>Buyer gửi yêu cầu</p></div>
+                <div class="step-box"><div class="step-num">4</div><p>StockFlow hỗ trợ giao hàng</p></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="buyModal">
+        <div class="modal-content">
+            <h2>Gửi yêu cầu mua</h2>
+            <p>Sản phẩm: <strong id="modalProductName"></strong></p>
+            <input type="text" id="buyerCompany" placeholder="Tên doanh nghiệp mua" style="margin-bottom:10px; width:100%;">
+            <input type="number" id="buyerQty" placeholder="Số lượng muốn mua" style="margin-bottom:10px; width:100%;">
+            <input type="text" id="buyerContact" placeholder="SĐT / Email" style="margin-bottom:10px; width:100%;">
+            <textarea id="buyerNote" rows="3" placeholder="Ghi chú thêm..." style="width:100%; box-sizing:border-box;"></textarea>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <button onclick="closeModal()" style="flex:1; padding:12px; background:#e74c3c; color:white; border:none; border-radius:6px; cursor:pointer;">Hủy</button>
+                <button onclick="submitRequest()" style="flex:1; padding:12px; background:var(--primary-green); color:white; border:none; border-radius:6px; cursor:pointer;">Gửi yêu cầu</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p><strong>StockFlow B2B</strong> - Biến hàng dư thành nguồn cung hữu ích.</p>
+        <p>Khu vực pilot: TP.HCM – Bình Dương – Đồng Nai.</p>
+        <p><em>* Prototype phục vụ mục đích học tập *</em></p>
+    </footer>
+
+    <script>
+        // Chuyển tab
+        function switchTab(tab) {
+            document.getElementById('seller-page').style.display = tab === 'seller' ? 'block' : 'none';
+            document.getElementById('buyer-page').style.display = tab === 'buyer' ? 'block' : 'none';
+            
+            document.getElementById('tab-seller').classList.toggle('active', tab === 'seller');
+            document.getElementById('tab-buyer').classList.toggle('active', tab === 'buyer');
+        }
+
+        // === SELLER SCRIPT ===
+        let selectedImageDataUrl = null;
+        document.getElementById('productImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    selectedImageDataUrl = ev.target.result;
+                    document.getElementById('imagePreview').src = selectedImageDataUrl;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('formPlaceholderText').style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('seller-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('productName').value;
+            const qty = document.getElementById('quantity').value;
+            const unit = document.getElementById('unit').value;
+            const price = document.getElementById('price').value;
+            const location = document.getElementById('location').value;
+
+            // Preview
+            if (selectedImageDataUrl) {
+                document.getElementById('cardPreviewImage').src = selectedImageDataUrl;
+                document.getElementById('cardPreviewImage').style.display = 'block';
+                document.getElementById('cardPlaceholderText').style.display = 'none';
+            }
+            document.getElementById('preview-title').innerText = name;
+            document.getElementById('preview-qty').innerText = qty + ' ' + unit;
+            document.getElementById('preview-price').innerText = price ? Number(price).toLocaleString('vi-VN') + ' VNĐ' : 'Thỏa thuận';
+            document.getElementById('preview-location').innerText = location;
+
+            document.getElementById('preview-section').style.display = 'block';
+            document.getElementById('preview-section').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // === BUYER SCRIPT ===
+        function filterListings() {
+            const category = document.getElementById('filter-category').value;
+            const location = document.getElementById('filter-location').value;
+            const keyword = document.getElementById('filter-keyword').value.toLowerCase();
+
+            document.querySelectorAll('.listing-card').forEach(card => {
+                const cCat = card.getAttribute('data-category');
+                const cLoc = card.getAttribute('data-location');
+                const cName = card.getAttribute('data-name').toLowerCase();
+
+                const matchCat = category === 'all' || cCat === category;
+                const matchLoc = location === 'all' || cLoc === location;
+                const matchKey = keyword === '' || cName.includes(keyword);
+
+                card.style.display = (matchCat && matchLoc && matchKey) ? 'flex' : 'none';
+            });
+        }
+
+        function openModal(productName) {
+            document.getElementById('modalProductName').innerText = productName;
+            document.getElementById('buyModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('buyModal').style.display = 'none';
+        }
+
+        function submitRequest() {
+            const company = document.getElementById('buyerCompany').value;
+            const qty = document.getElementById('buyerQty').value;
+            if (!company || !qty) {
+                alert('Vui lòng nhập tên doanh nghiệp và số lượng!');
+                return;
+            }
+            closeModal();
+            alert('✅ Yêu cầu mua đã được gửi thành công! Seller sẽ liên hệ xác nhận.');
+        }
+
+        // Khởi tạo mặc định
+        window.onload = () => switchTab('seller');
+    </script>
+</body>
+</html>
