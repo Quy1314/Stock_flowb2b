@@ -4,6 +4,37 @@
 -- application profile, business workflow, RLS policies, RPC functions,
 -- notifications, and Storage buckets/policies.
 
+-- Clean reset (uncomment if you want to completely rebuild the schema)
+-- drop schema public cascade;
+-- create schema public;
+
+-- Drop existing tables if they exist to allow clean recreation
+drop table if exists public.shipment_events cascade;
+drop table if exists public.shipments cascade;
+drop table if exists public.orders cascade;
+drop table if exists public.payments cascade;
+drop table if exists public.logistics_quotes cascade;
+drop table if exists public.logistics_partners cascade;
+drop table if exists public.purchase_requests cascade;
+drop table if exists public.listing_media cascade;
+drop table if exists public.listings cascade;
+drop table if exists public.warehouses cascade;
+drop table if exists public.profiles cascade;
+drop table if exists public.organizations cascade;
+drop table if exists public.categories cascade;
+drop table if exists public.notifications cascade;
+
+-- Drop existing types to avoid enum definition conflict errors
+drop type if exists public.app_role cascade;
+drop type if exists public.listing_status cascade;
+drop type if exists public.media_type cascade;
+drop type if exists public.purchase_request_status cascade;
+drop type if exists public.quote_status cascade;
+drop type if exists public.order_status cascade;
+drop type if exists public.shipment_status cascade;
+drop type if exists public.payment_type cascade;
+drop type if exists public.payment_status cascade;
+
 begin;
 
 create extension if not exists pgcrypto;
@@ -892,6 +923,9 @@ create or replace function public.host_add_logistics_quote(
   p_request_id uuid,
   p_logistics_partner_id uuid,
   p_shipping_fee numeric,
+  p_loading_fee numeric default 0,
+  p_count_fee numeric default 0,
+  p_duration_text text default null,
   p_estimated_pickup_at timestamptz default null,
   p_estimated_delivery_at timestamptz default null,
   p_valid_until timestamptz default null,
@@ -914,6 +948,14 @@ begin
     raise exception 'Shipping fee cannot be negative';
   end if;
 
+  if p_loading_fee < 0 then
+    raise exception 'Loading fee cannot be negative';
+  end if;
+
+  if p_count_fee < 0 then
+    raise exception 'Count fee cannot be negative';
+  end if;
+
   select * into req
   from public.purchase_requests
   where id = p_request_id
@@ -929,11 +971,13 @@ begin
 
   insert into public.logistics_quotes(
     purchase_request_id, logistics_partner_id, created_by,
-    shipping_fee, estimated_pickup_at, estimated_delivery_at,
+    shipping_fee, loading_fee, count_fee, duration_text,
+    estimated_pickup_at, estimated_delivery_at,
     valid_until, note, status
   ) values (
     p_request_id, p_logistics_partner_id, (select auth.uid()),
-    p_shipping_fee, p_estimated_pickup_at, p_estimated_delivery_at,
+    p_shipping_fee, p_loading_fee, p_count_fee, p_duration_text,
+    p_estimated_pickup_at, p_estimated_delivery_at,
     p_valid_until, p_note, 'submitted'
   ) returning * into quote_row;
 
@@ -1704,6 +1748,16 @@ on conflict (id) do update set
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
+insert into storage.buckets(id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'shipment-proofs', 'shipment-proofs', true, 5242880,
+  array['image/jpeg', 'image/png', 'image/webp']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
 -- Product images are publicly readable.
 drop policy if exists product_images_public_read on storage.objects;
 create policy product_images_public_read on storage.objects
@@ -1738,6 +1792,22 @@ for delete to authenticated
 using (
   bucket_id = 'product-images'
   and ((storage.foldername(name))[1] = (select auth.uid())::text or public.is_host())
+);
+
+-- Shipment proofs are publicly readable.
+drop policy if exists shipment_proofs_public_read on storage.objects;
+create policy shipment_proofs_public_read on storage.objects
+for select to anon, authenticated
+using (bucket_id = 'shipment-proofs');
+
+-- Carrier uploads under: shipment-proofs/<auth.uid()>/<filename>
+drop policy if exists shipment_proofs_carrier_insert on storage.objects;
+create policy shipment_proofs_carrier_insert on storage.objects
+for insert to authenticated
+with check (
+  bucket_id = 'shipment-proofs'
+  and public.current_app_role() = 'carrier'::public.app_role
+  and (storage.foldername(name))[1] = (select auth.uid())::text
 );
 
 -- Listing documents are private to the seller and hosts.
@@ -1794,7 +1864,7 @@ grant usage, select on all sequences in schema public to authenticated;
 revoke execute on function public.host_review_listing(uuid, boolean, text) from public, anon;
 revoke execute on function public.host_assign_purchase_request(uuid) from public, anon;
 revoke execute on function public.seller_respond_purchase_request(uuid, boolean, numeric, numeric, text) from public, anon;
-revoke execute on function public.host_add_logistics_quote(uuid, uuid, numeric, timestamptz, timestamptz, timestamptz, text) from public, anon;
+revoke execute on function public.host_add_logistics_quote(uuid, uuid, numeric, numeric, numeric, text, timestamptz, timestamptz, timestamptz, text) from public, anon;
 revoke execute on function public.buyer_confirm_logistics_quote(uuid, uuid) from public, anon;
 revoke execute on function public.buyer_cancel_purchase_request(uuid, text) from public, anon;
 revoke execute on function public.host_create_order(uuid, numeric) from public, anon;
@@ -1804,7 +1874,7 @@ grant execute on function public.is_host() to anon, authenticated;
 grant execute on function public.host_review_listing(uuid, boolean, text) to authenticated;
 grant execute on function public.host_assign_purchase_request(uuid) to authenticated;
 grant execute on function public.seller_respond_purchase_request(uuid, boolean, numeric, numeric, text) to authenticated;
-grant execute on function public.host_add_logistics_quote(uuid, uuid, numeric, timestamptz, timestamptz, timestamptz, text) to authenticated;
+grant execute on function public.host_add_logistics_quote(uuid, uuid, numeric, numeric, numeric, text, timestamptz, timestamptz, timestamptz, text) to authenticated;
 grant execute on function public.buyer_confirm_logistics_quote(uuid, uuid) to authenticated;
 grant execute on function public.buyer_cancel_purchase_request(uuid, text) to authenticated;
 grant execute on function public.host_create_order(uuid, numeric) to authenticated;
@@ -1829,3 +1899,20 @@ commit;
 -- seller:   { "role": "seller", "full_name": "Seller Name" }
 -- customer: { "role": "customer", "full_name": "Buyer Name" }
 -- Any public request for role=host is intentionally converted to customer.
+
+update public.profiles
+set
+  role = 'host'::public.app_role,
+  is_active = true,
+  updated_at = now()
+where id = 'a1757dcc-f848-4be6-b637-87bd3d903e26';
+
+
+
+select
+  id,
+  email,
+  role,
+  is_active
+from public.profiles
+where id = 'a1757dcc-f848-4be6-b637-87bd3d903e26';

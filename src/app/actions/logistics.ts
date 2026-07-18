@@ -2,7 +2,15 @@
 
 import { createClient } from '@/utils/supabase/server'
 
-export async function submitLogisticsQuote(requestId: string, shippingFee: number) {
+export async function submitLogisticsQuote(
+  requestId: string,
+  shippingFee: number,
+  loadingFee?: number,
+  countFee?: number,
+  durationText?: string,
+  logisticsPartnerId?: string,
+  note?: string
+) {
   const supabase = await createClient()
 
   // 1. Get user session
@@ -26,10 +34,18 @@ export async function submitLogisticsQuote(requestId: string, shippingFee: numbe
     return { success: false, error: 'Chỉ tài khoản Điều phối viên mới có quyền nhập báo giá logistics.' }
   }
 
+  // Use a fallback UUID for partner if not provided
+  const partnerId = logisticsPartnerId || '00000000-0000-0000-0000-000000000000'
+
   // 3. Call RPC function
-  const { data, error } = await supabase.rpc('host_submit_logistics_quote', {
+  const { data, error } = await supabase.rpc('host_add_logistics_quote', {
     p_request_id: requestId,
+    p_logistics_partner_id: partnerId,
     p_shipping_fee: shippingFee,
+    p_loading_fee: loadingFee || 0,
+    p_count_fee: countFee || 0,
+    p_duration_text: durationText || null,
+    p_note: note || null,
   })
 
   if (error) {
@@ -86,8 +102,8 @@ export async function updateShipmentStatus(shipmentId: string, statusText: strin
     .eq('id', user.id)
     .single()
 
-  if (profileError || !profile || profile.role !== 'host') {
-    return { success: false, error: 'Chỉ tài khoản Điều phối viên mới có quyền cập nhật trạng thái vận đơn.' }
+  if (profileError || !profile || (profile.role !== 'host' && profile.role !== 'carrier')) {
+    return { success: false, error: 'Chỉ tài khoản Điều phối viên hoặc Đơn vị vận tải mới có quyền cập nhật trạng thái vận đơn.' }
   }
 
   const { data, error } = await supabase.rpc('host_update_shipment_status', {

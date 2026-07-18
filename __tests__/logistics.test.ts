@@ -29,9 +29,14 @@ describe('Logistics (Story 4.1)', () => {
 
     const res = await submitLogisticsQuote('req-123', 150000)
     expect(res.success).toBe(true)
-    expect(mockRpc).toHaveBeenCalledWith('host_submit_logistics_quote', {
+    expect(mockRpc).toHaveBeenCalledWith('host_add_logistics_quote', {
       p_request_id: 'req-123',
+      p_logistics_partner_id: '00000000-0000-0000-0000-000000000000',
       p_shipping_fee: 150000,
+      p_loading_fee: 0,
+      p_count_fee: 0,
+      p_duration_text: null,
+      p_note: null,
     })
   })
 
