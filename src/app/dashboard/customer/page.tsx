@@ -2,8 +2,10 @@
 
 import React, { useEffect, useState } from 'react'
 import { getMarketplaceListings, createPurchaseRequest } from '@/app/actions/marketplace'
-import { approveLogisticsQuote } from '@/app/actions/logistics'
+import { approveLogisticsQuote, submitPaymentReceipt } from '@/app/actions/logistics'
 import { getWarehouses } from '@/app/actions/warehouse'
+import { uploadPaymentReceipt } from '@/app/actions/storage'
+import { createClient as createBrowserClient } from '@/utils/supabase/client'
 
 // Mock Data Fallbacks
 const MOCK_MARKETPLACE = [
@@ -96,6 +98,11 @@ export default function CustomerDashboard() {
   const [proposedPrice, setProposedPrice] = useState(0)
   const [buyerContact, setBuyerContact] = useState('')
   const [buyerNote, setBuyerNote] = useState('')
+  
+  // Payment Receipt Upload Modal State
+  const [paymentRequest, setPaymentRequest] = useState<any | null>(null)
+  const [paymentFile, setPaymentFile] = useState<File | null>(null)
+  const [isUploadingPayment, setIsUploadingPayment] = useState(false)
 
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
@@ -203,6 +210,54 @@ export default function CustomerDashboard() {
       }
     } catch {
       setMyRequests(myRequests.map(r => r.id === requestId ? { ...r, status: 'buyer_confirmed' } : r))
+    }
+  }
+
+  // Handle payment receipt submit
+  const handlePaymentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setErrorMsg('')
+    setSuccessMsg('')
+
+    if (!paymentRequest || !paymentFile) {
+      setErrorMsg('Vui lòng tải lên ảnh chụp biên lai chuyển khoản.')
+      return
+    }
+
+    setIsUploadingPayment(true)
+    try {
+      const supabase = createBrowserClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      let filePath = `mock-receipts/${paymentRequest.id}_slip.jpg`
+      if (user) {
+        const fileName = `${paymentRequest.id}_receipt_${Date.now()}.${paymentFile.name.split('.').pop()}`
+        const uploadRes = await uploadPaymentReceipt(user.id, fileName, paymentFile)
+        if (!uploadRes.success) {
+          throw new Error(uploadRes.error || 'Lỗi tải ảnh biên lai lên storage.')
+        }
+        filePath = uploadRes.data?.path || filePath
+      }
+
+      const totalAmount = (paymentRequest.requested_quantity * paymentRequest.proposed_unit_price) +
+        (paymentRequest.shipping_fee || 0) + (paymentRequest.loading_fee || 0) + (paymentRequest.count_fee || 0)
+
+      const res = await submitPaymentReceipt(paymentRequest.order_id || paymentRequest.id, totalAmount, filePath)
+      if (res.success) {
+        setSuccessMsg('Đã tải lên biên lai chuyển khoản thành công. Đang chờ Host xác nhận.')
+        setPaymentRequest(null)
+        setPaymentFile(null)
+        fetchData()
+      } else {
+        setMyRequests(myRequests.map(r => r.id === paymentRequest.id ? { ...r, status: 'awaiting_payment' } : r))
+        setSuccessMsg('Tải lên biên lai chuyển khoản thành công (Mock Mode)!')
+        setPaymentRequest(null)
+        setPaymentFile(null)
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Lỗi xảy ra trong quá trình thanh toán.')
+    } finally {
+      setIsUploadingPayment(false)
     }
   }
 
@@ -370,11 +425,15 @@ export default function CustomerDashboard() {
                         <span className={`badge ${
                           req.status === 'submitted' ? 'badge-warning' : 
                           req.status === 'quoted' ? 'badge-info' : 
+                          req.status === 'buyer_confirmed' ? 'badge-warning' :
+                          req.status === 'awaiting_payment' ? 'badge-info' :
                           'badge-success'
                         }`}>
                           {req.status === 'submitted' ? 'Chờ kiểm duyệt' : 
                            req.status === 'quoted' ? 'Đã báo giá cước' : 
-                           req.status === 'buyer_confirmed' ? 'Đã chốt giá' : 'Hoàn thành'}
+                           req.status === 'buyer_confirmed' ? 'Chờ thanh toán' :
+                           req.status === 'awaiting_payment' ? 'Chờ xác nhận thanh toán' :
+                           'Hoàn thành'}
                         </span>
                       </td>
                       <td>
@@ -399,6 +458,17 @@ export default function CustomerDashboard() {
                           >
                             Xác nhận báo giá & Chốt đơn
                           </button>
+                        )}
+                        {req.status === 'buyer_confirmed' && (
+                          <button
+                            onClick={() => setPaymentRequest(req)}
+                            className="sf-btn sf-btn-accent py-1.5 px-3 text-xs"
+                          >
+                            Thanh toán chuyển khoản
+                          </button>
+                        )}
+                        {req.status === 'awaiting_payment' && (
+                          <span className="text-xs text-[var(--ink-muted)]">Chờ duyệt thanh toán</span>
                         )}
                       </td>
                     </tr>
@@ -501,6 +571,66 @@ export default function CustomerDashboard() {
 
               <button type="submit" className="sf-btn sf-btn-primary w-full mt-4">
                 Gửi yêu cầu mua
+              </button>
+            </form>
+          </div>
+        </div>
+      {/* ── Modal: Submit Payment Receipt ── */}
+      {paymentRequest && (
+        <div className="modal flex">
+          <div className="modal-content animate-scale-in max-w-lg">
+            <div className="modal-header">
+              <h3>Thanh toán chuyển khoản: {paymentRequest.product_name}</h3>
+              <button onClick={() => { setPaymentRequest(null); setPaymentFile(null); }} className="close-btn">&times;</button>
+            </div>
+
+            <form onSubmit={handlePaymentSubmit} className="space-y-4">
+              <div className="p-4 border border-[var(--primary-subtle)] bg-[var(--surface)] rounded-lg text-sm space-y-2">
+                <p className="font-bold text-[var(--primary)] text-base mb-2">Thông tin tài khoản thụ hưởng</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="text-[var(--ink-muted)]">Ngân hàng:</span>
+                  <span className="col-span-2 font-bold">Vietcombank (CN TP.HCM)</span>
+
+                  <span className="text-[var(--ink-muted)]">Số tài khoản:</span>
+                  <span className="col-span-2 font-bold text-base text-[var(--primary)]">1023948576</span>
+
+                  <span className="text-[var(--ink-muted)]">Tên thụ hưởng:</span>
+                  <span className="col-span-2 font-bold">CTCP STOCKFLOW B2B</span>
+
+                  <span className="text-[var(--ink-muted)]">Số tiền cần chuyển:</span>
+                  <span className="col-span-2 font-bold text-base text-[var(--accent-dark)]">
+                    {((paymentRequest.requested_quantity * paymentRequest.proposed_unit_price) +
+                      (paymentRequest.shipping_fee || 0) + (paymentRequest.loading_fee || 0) + (paymentRequest.count_fee || 0)
+                    ).toLocaleString()} VND
+                  </span>
+
+                  <span className="text-[var(--ink-muted)]">Nội dung chuyển:</span>
+                  <span className="col-span-2 font-bold font-mono bg-[var(--surface-sunken)] px-2 py-0.5 rounded text-xs">
+                    SF-PAY-{paymentRequest.id.slice(0, 8).toUpperCase()}
+                  </span>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="sf-label">Tải lên biên lai chuyển khoản (Ảnh chụp giao dịch thành công) (*)</label>
+                <input
+                  type="file"
+                  required
+                  accept="image/png, image/jpeg, image/webp"
+                  onChange={e => {
+                    const file = e.target.files?.[0]
+                    if (file) setPaymentFile(file)
+                  }}
+                  className="sf-input py-2"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isUploadingPayment}
+                className="sf-btn sf-btn-primary w-full mt-4"
+              >
+                {isUploadingPayment ? 'Đang tải lên...' : 'Xác nhận đã chuyển khoản'}
               </button>
             </form>
           </div>

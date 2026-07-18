@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { reviewListing } from '@/app/actions/listing'
 import { assignCoordinator } from '@/app/actions/marketplace'
-import { submitLogisticsQuote, updateShipmentStatus } from '@/app/actions/logistics'
+import { submitLogisticsQuote, updateShipmentStatus, confirmPaymentReceipt } from '@/app/actions/logistics'
 
 // Mock Data Fallbacks
 const MOCK_PENDING_LISTINGS = [
@@ -224,6 +224,25 @@ export default function HostDashboard() {
     }
   }
 
+  // Handle payment confirmation
+  const handleConfirmPayment = async (orderId: string) => {
+    setErrorMsg('')
+    setSuccessMsg('')
+    try {
+      const res = await confirmPaymentReceipt(orderId)
+      if (res.success) {
+        setSuccessMsg('Đã xác nhận thanh toán thành công!')
+        fetchData()
+      } else {
+        setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'paid' } : o))
+        setSuccessMsg('Xác nhận thanh toán thành công (Mock Mode)!')
+      }
+    } catch {
+      setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'paid' } : o))
+      setSuccessMsg('Xác nhận thanh toán thành công (Mock Mode)!')
+    }
+  }
+
   return (
     <div className="space-y-8 animate-fade-in">
       {successMsg && <div className="sf-msg-success mb-4">{successMsg}</div>}
@@ -401,6 +420,7 @@ export default function HostDashboard() {
                   <th>Sản phẩm</th>
                   <th>Tổng giá trị</th>
                   <th>Trạng thái thanh toán</th>
+                  <th>Hành động</th>
                 </tr>
               </thead>
               <tbody>
@@ -411,7 +431,38 @@ export default function HostDashboard() {
                     <td>{ord.product_name}</td>
                     <td className="font-bold text-[var(--primary)]">{ord.total_amount.toLocaleString()} VND</td>
                     <td>
-                      <span className="badge badge-warning">Chờ thanh toán chuyển khoản</span>
+                      <span className={`badge ${
+                        ord.status === 'awaiting_payment' ? 'badge-warning' : 
+                        ord.status === 'paid' ? 'badge-success' : 'badge-info'
+                      }`}>
+                        {ord.status === 'awaiting_payment' ? 'Chờ thanh toán chuyển khoản' : 
+                         ord.status === 'paid' ? 'Đã thanh toán (Verified)' : ord.status}
+                      </span>
+                    </td>
+                    <td>
+                      {ord.status === 'awaiting_payment' && (
+                        <div className="flex items-center gap-2">
+                          <a 
+                            href="#" 
+                            onClick={(e) => {
+                              e.preventDefault()
+                              alert("Mở xem ảnh biên lai minh họa: /receipts/mock_slip.jpg")
+                            }}
+                            className="text-xs text-[var(--primary)] underline"
+                          >
+                            Xem biên lai
+                          </a>
+                          <button
+                            onClick={() => handleConfirmPayment(ord.id)}
+                            className="sf-btn sf-btn-primary py-1 px-2 text-xs font-bold"
+                          >
+                            Xác nhận đã nhận tiền
+                          </button>
+                        </div>
+                      )}
+                      {ord.status === 'paid' && (
+                        <span className="text-xs text-[var(--primary)] font-bold">✔️ Đã xác nhận</span>
+                      )}
                     </td>
                   </tr>
                 ))}

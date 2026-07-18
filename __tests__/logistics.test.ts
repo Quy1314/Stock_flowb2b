@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
-import { submitLogisticsQuote, approveLogisticsQuote, updateShipmentStatus, confirmDelivery } from '@/app/actions/logistics'
+import { submitLogisticsQuote, approveLogisticsQuote, updateShipmentStatus, confirmDelivery, submitPaymentReceipt, confirmPaymentReceipt } from '@/app/actions/logistics'
+import * as supabaseServer from '@/utils/supabase/server'
 
 // Mock the Supabase server client
 const mockRpc = vi.fn()
@@ -76,5 +77,73 @@ describe('Logistics (Story 4.1)', () => {
     expect(mockRpc).toHaveBeenCalledWith('host_confirm_delivery', {
       p_shipment_id: 'shipment-123',
     })
+  })
+
+  it('submits payment receipt successfully as customer', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'customer-123' } } })
+    // Mock the chainable database call for upsert and update
+    // Instead of mockRpc, here we use direct table upsert, so let's mock it
+    const mockUpsert = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({ data: { id: 'payment-123' }, error: null })
+      })
+    })
+    const mockUpdate = vi.fn().mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ error: null })
+    })
+    
+    // Temporarily mock supabase methods
+    const mockClientInstance = {
+      auth: { getUser: mockGetUser },
+      from: vi.fn().mockImplementation((table) => {
+        if (table === 'payments') {
+          return { upsert: mockUpsert }
+        }
+        if (table === 'orders') {
+          return { update: mockUpdate }
+        }
+        return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: { role: 'customer' } }) }) }) }
+      })
+    }
+    
+    vi.spyOn(supabaseServer, 'createClient').mockResolvedValue(mockClientInstance as any)
+    
+    const res = await submitPaymentReceipt('order-123', 500000, 'receipts/slip.jpg')
+    expect(res.success).toBe(true)
+  })
+
+  it('confirms payment receipt successfully as host', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'host-123' } } })
+    const mockUpdatePayment = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: { id: 'payment-123', order_id: 'order-123' }, error: null })
+        })
+      })
+    })
+    const mockUpdateOrder = vi.fn().mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ error: null })
+    })
+    
+    const mockClientInstance = {
+      auth: { getUser: mockGetUser },
+      from: vi.fn().mockImplementation((table) => {
+        if (table === 'profiles') {
+          return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: { role: 'host' } }) }) }) }
+        }
+        if (table === 'payments') {
+          return { update: mockUpdatePayment }
+        }
+        if (table === 'orders') {
+          return { update: mockUpdateOrder }
+        }
+        return {}
+      })
+    }
+    
+    vi.spyOn(supabaseServer, 'createClient').mockResolvedValue(mockClientInstance as any)
+    
+    const res = await confirmPaymentReceipt('payment-123')
+    expect(res.success).toBe(true)
   })
 })

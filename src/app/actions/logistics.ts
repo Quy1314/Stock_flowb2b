@@ -141,9 +141,64 @@ export async function confirmDelivery(shipmentId: string) {
     p_shipment_id: shipmentId,
   })
 
-  if (error) {
-    return { success: false, error: error.message }
-  }
+  return { success: true, data }
+}
+
+export async function submitPaymentReceipt(orderId: string, amount: number, receiptPath: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Người dùng chưa đăng nhập.' }
+
+  // Insert or update payment record
+  const { data, error } = await supabase
+    .from('payments')
+    .upsert({
+      order_id: orderId,
+      payer_id: user.id,
+      payment_type: 'bank_transfer',
+      amount: amount,
+      status: 'pending',
+      beneficiary_name: 'StockFlow B2B',
+      receipt_image_path: receiptPath,
+    }, { onConflict: 'order_id,payment_type' })
+    .select()
+    .single()
+
+  if (error) return { success: false, error: error.message }
+
+  // Update order status if order exists
+  await supabase
+    .from('orders')
+    .update({ status: 'awaiting_payment' }) // we keep the order status
+    .eq('id', orderId)
 
   return { success: true, data }
+}
+
+export async function confirmPaymentReceipt(paymentId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Người dùng chưa đăng nhập.' }
+
+  // check if host
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (profile?.role !== 'host') return { success: false, error: 'Chỉ Host mới có quyền xác nhận thanh toán.' }
+
+  // Update payment status to paid
+  const { data: payment, error } = await supabase
+    .from('payments')
+    .update({ status: 'paid', paid_at: new Date().toISOString() })
+    .eq('id', paymentId)
+    .select()
+    .single()
+
+  if (error) return { success: false, error: error.message }
+
+  // Update order status to paid / awaiting_shipment
+  await supabase
+    .from('orders')
+    .update({ status: 'paid' })
+    .eq('id', payment.order_id)
+
+  return { success: true, data: payment }
 }

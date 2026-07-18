@@ -396,6 +396,7 @@ create table if not exists public.payments (
   status public.payment_status not null default 'pending',
   beneficiary_name text not null,
   transaction_reference text,
+  receipt_image_path text,
   paid_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -1758,6 +1759,16 @@ on conflict (id) do update set
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
+insert into storage.buckets(id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'payment-receipts', 'payment-receipts', true, 5242880,
+  array['image/jpeg', 'image/png', 'image/webp']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
 -- Product images are publicly readable.
 drop policy if exists product_images_public_read on storage.objects;
 create policy product_images_public_read on storage.objects
@@ -1807,6 +1818,25 @@ for insert to authenticated
 with check (
   bucket_id = 'shipment-proofs'
   and public.current_app_role() = 'carrier'::public.app_role
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
+-- Payment receipts are readable by the uploader and hosts.
+drop policy if exists payment_receipts_read on storage.objects;
+create policy payment_receipts_read on storage.objects
+for select to authenticated
+using (
+  bucket_id = 'payment-receipts'
+  and ((storage.foldername(name))[1] = (select auth.uid())::text or public.is_host())
+);
+
+-- Customers can upload under payment-receipts/<auth.uid()>/<filename>
+drop policy if exists payment_receipts_buyer_insert on storage.objects;
+create policy payment_receipts_buyer_insert on storage.objects
+for insert to authenticated
+with check (
+  bucket_id = 'payment-receipts'
+  and public.current_app_role() = 'customer'::public.app_role
   and (storage.foldername(name))[1] = (select auth.uid())::text
 );
 
