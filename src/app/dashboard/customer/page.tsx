@@ -575,6 +575,7 @@ export default function CustomerDashboard() {
             </form>
           </div>
         </div>
+      )}
       {/* ── Modal: Submit Payment Receipt ── */}
       {paymentRequest && (
         <div className="modal flex">
