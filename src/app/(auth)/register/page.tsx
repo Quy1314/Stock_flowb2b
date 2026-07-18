@@ -74,29 +74,35 @@ export default function RegisterPage() {
 
   return (
     <main
-      className="flex min-h-screen flex-col items-center justify-center p-6"
-      style={{ background: 'var(--surface-sunken)' }}
+      className="relative flex min-h-screen flex-col items-center justify-center p-6 overflow-hidden"
+      style={{
+        background: 'radial-gradient(circle at 0% 0%, oklch(0.92 0.05 180), oklch(0.97 0.01 180) 60%)',
+      }}
     >
-      {/* Decorative orbs */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed top-0 right-1/4 h-[500px] w-[500px] rounded-full opacity-12 blur-3xl"
-        style={{ background: 'var(--primary)' }}
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed -bottom-32 left-0 h-[400px] w-[400px] rounded-full opacity-10 blur-3xl"
-        style={{ background: 'var(--accent)' }}
-      />
+      {/* Abstract Warehouse & Cargo Background Silhouettes */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
+        <svg
+          className="absolute bottom-0 left-0 w-full h-[320px] text-[var(--primary)] opacity-10"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+        >
+          <path
+            fill="currentColor"
+            d="M0,224L60,208C120,192,240,160,360,165.3C480,171,600,213,720,218.7C840,224,960,192,1080,176C1200,160,1320,160,1380,160L1440,160L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"
+          />
+        </svg>
+        <div className="absolute -top-40 left-1/4 w-96 h-96 rounded-full bg-[var(--primary)] opacity-20 blur-[100px]" />
+        <div className="absolute top-1/2 -right-40 w-80 h-80 rounded-full bg-[var(--accent)] opacity-10 blur-[80px]" />
+      </div>
 
       <section
-        className="relative z-10 w-full animate-scale-in"
+        className="relative z-10 w-full rounded-2xl p-8 md:p-10 shadow-2xl transition-all duration-300 animate-scale-in"
         style={{
-          background: 'var(--surface-raised)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius-xl)',
-          padding: 'var(--space-10)',
-          boxShadow: 'var(--shadow-lg)',
+          background: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(0, 128, 128, 0.15)',
+          boxShadow: '0 20px 40px oklch(0.18 0.02 180 / 0.08)',
           maxWidth: '36rem',
         }}
       >

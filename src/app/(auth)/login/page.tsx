@@ -9,7 +9,7 @@ export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [mockRole, setMockRole] = useState<'none' | 'seller' | 'customer' | 'host'>('none')
+  const [mockRole, setMockRole] = useState<'none' | 'seller' | 'customer' | 'host' | 'carrier'>('none')
 
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -20,14 +20,12 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      // Call action
       const res = await loginUser(email, password, mockRole === 'none' ? undefined : mockRole)
 
       if (res.success && res.role) {
         if (mockRole !== 'none') {
           document.cookie = `sb-mock-role=${res.role}; path=/`
         } else {
-          // Clear mock role cookie
           document.cookie = 'sb-mock-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
         }
         router.push(`/dashboard/${res.role}`)
@@ -43,65 +41,81 @@ export default function LoginPage() {
 
   return (
     <main
-      className="flex min-h-screen flex-col items-center justify-center p-6"
-      style={{ background: 'var(--surface-sunken)' }}
+      className="relative flex min-h-screen flex-col items-center justify-center p-6 overflow-hidden"
+      style={{
+        background: 'radial-gradient(circle at 0% 0%, oklch(0.92 0.05 180), oklch(0.97 0.01 180) 60%)',
+      }}
     >
-      {/* Decorative orbs */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed -top-32 -right-32 h-[500px] w-[500px] rounded-full opacity-15 blur-3xl"
-        style={{ background: 'var(--primary)' }}
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed -bottom-40 -left-40 h-[400px] w-[400px] rounded-full opacity-10 blur-3xl"
-        style={{ background: 'var(--accent)' }}
-      />
+      {/* Abstract Warehouse & Cargo Background Silhouettes */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
+        <svg
+          className="absolute bottom-0 left-0 w-full h-[320px] text-[var(--primary)] opacity-10"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+        >
+          <path
+            fill="currentColor"
+            d="M0,224L60,208C120,192,240,160,360,165.3C480,171,600,213,720,218.7C840,224,960,192,1080,176C1200,160,1320,160,1380,160L1440,160L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"
+          />
+        </svg>
+        {/* Soft blur orbs */}
+        <div className="absolute -top-40 left-1/4 w-96 h-96 rounded-full bg-[var(--primary)] opacity-20 blur-[100px]" />
+        <div className="absolute top-1/2 -right-40 w-80 h-80 rounded-full bg-[var(--accent)] opacity-10 blur-[80px]" />
+      </div>
 
-      <section className="sf-auth-card animate-scale-in relative z-10">
-        <header className="mb-8 text-center">
+      {/* Auth Card with Glassmorphism */}
+      <section
+        className="relative z-10 w-full max-w-[28rem] rounded-2xl p-8 md:p-10 shadow-2xl transition-all duration-300 animate-scale-in"
+        style={{
+          background: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(0, 128, 128, 0.15)',
+          boxShadow: '0 20px 40px oklch(0.18 0.02 180 / 0.08)',
+        }}
+      >
+        <header className="mb-6 text-center">
           <Link
             href="/"
-            className="mb-4 inline-flex items-center gap-2 text-xl font-bold no-underline"
+            className="inline-flex items-center gap-3 text-2xl font-bold no-underline transition-transform duration-200 hover:scale-105"
             style={{
               fontFamily: 'var(--font-heading)',
               color: 'var(--ink)',
             }}
           >
             <span
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-extrabold"
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-extrabold shadow-md animate-pulse"
               style={{
-                background: 'var(--primary)',
+                background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
                 color: 'var(--ink-on-primary)',
               }}
             >
               SF
             </span>
-            StockFlow
+            StockFlow B2B
           </Link>
           <h1
-            className="mt-4"
+            className="mt-4 font-bold"
             style={{
-              fontSize: 'clamp(1.375rem, 3vw, 1.75rem)',
+              fontSize: '1.625rem',
               color: 'var(--ink)',
+              letterSpacing: '-0.02em',
             }}
           >
             Đăng nhập
           </h1>
           <p
-            className="mx-auto mt-2"
+            className="mx-auto mt-2 text-sm"
             style={{
-              fontSize: '0.9375rem',
               color: 'var(--ink-secondary)',
-              margin: '0.5rem auto 0',
             }}
           >
             Chào mừng trở lại. Nhập thông tin để tiếp tục.
           </p>
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-5 animate-fade-up delay-1">
-          <div>
+        <form onSubmit={handleSubmit} className="space-y-4 animate-fade-up">
+          <div className="form-group">
             <label htmlFor="email-input" className="sf-label">
               Email
             </label>
@@ -111,22 +125,33 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="sf-input"
+              style={{ borderRadius: 'var(--radius-lg)' }}
               placeholder="name@company.com"
               required={mockRole === 'none'}
               autoComplete="email"
             />
           </div>
 
-          <div>
-            <label htmlFor="password-input" className="sf-label">
-              Mật khẩu
-            </label>
+          <div className="form-group">
+            <div className="flex justify-between items-center mb-1">
+              <label htmlFor="password-input" className="sf-label mb-0">
+                Mật khẩu
+              </label>
+              <a
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className="text-xs text-[var(--primary)] hover:underline"
+              >
+                Quên mật khẩu?
+              </a>
+            </div>
             <input
               id="password-input"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="sf-input"
+              style={{ borderRadius: 'var(--radius-lg)' }}
               placeholder="••••••••"
               required={mockRole === 'none'}
               autoComplete="current-password"
@@ -136,14 +161,16 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="sf-btn sf-btn-primary w-full"
+            className="sf-btn sf-btn-primary w-full py-3"
             style={{
-              padding: 'var(--space-4) var(--space-6)',
-              fontSize: '1rem',
+              borderRadius: 'var(--radius-lg)',
+              background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+              fontSize: '0.9375rem',
+              fontWeight: 'bold',
             }}
           >
             {loading ? (
-              <span className="flex items-center gap-2">
+              <span className="flex items-center justify-center gap-2">
                 <svg
                   className="animate-spin"
                   xmlns="http://www.w3.org/2000/svg"
@@ -165,22 +192,23 @@ export default function LoginPage() {
           </button>
 
           {error && (
-            <p className="sf-msg-error-banner" role="alert">
+            <p className="sf-msg-error-banner text-center" role="alert">
               {error}
             </p>
           )}
 
           {/* ── Dev-only mock role ─────────────────────────── */}
-          <div className="sf-dev-only">
-            <p className="sf-dev-only-label">🔧 Dành cho Lập trình viên</p>
-            <label htmlFor="mock-role-select" className="sf-label" style={{ color: 'var(--ink-muted)' }}>
+          <div className="sf-dev-only mt-6 p-4 border border-[var(--primary-subtle)] bg-[var(--surface-sunken)] rounded-xl">
+            <p className="sf-dev-only-label font-bold text-[var(--primary-dark)] text-xs mb-2">🔧 Dành cho Lập trình viên</p>
+            <label htmlFor="mock-role-select" className="sf-label text-xs" style={{ color: 'var(--ink-muted)' }}>
               Mô phỏng Vai trò
             </label>
             <select
               id="mock-role-select"
               value={mockRole}
               onChange={(e) => setMockRole(e.target.value as any)}
-              className="sf-select"
+              className="sf-select text-xs"
+              style={{ borderRadius: 'var(--radius-md)', padding: '6px 12px' }}
             >
               <option value="none">Không mô phỏng (Dùng Auth thật)</option>
               <option value="customer">Người mua (Customer)</option>
@@ -192,14 +220,13 @@ export default function LoginPage() {
         </form>
 
         <p
-          className="mt-8 text-center text-sm animate-fade-up delay-2"
+          className="mt-6 text-center text-xs"
           style={{ color: 'var(--ink-secondary)' }}
         >
           Chưa có tài khoản?{' '}
           <Link
             href="/register"
-            className="font-semibold"
-            style={{ color: 'var(--primary)' }}
+            className="font-bold text-[var(--primary)] hover:underline"
           >
             Đăng ký doanh nghiệp
           </Link>
