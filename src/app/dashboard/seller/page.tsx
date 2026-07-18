@@ -248,6 +248,8 @@ export default function SellerDashboard() {
         expiryDate: newListing.expiryDate || undefined,
         description: newListing.description || undefined,
         isCommitted: newListing.isCommitted,
+        lotNumber: newListing.lotNumber || undefined,
+        documentNotes: docNotes || undefined,
       })
 
       // Setup preview object

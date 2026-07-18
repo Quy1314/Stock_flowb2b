@@ -15,6 +15,8 @@ export async function createListing(formData: {
   locationText?: string
   description?: string
   isCommitted: boolean
+  lotNumber?: string
+  documentNotes?: string
 }) {
   if (!formData.isCommitted) {
     return { success: false, error: 'Bạn phải cam kết thông tin đúng sự thật.' }
@@ -63,6 +65,8 @@ export async function createListing(formData: {
       condition_text: formData.conditionText,
       manufacturing_date: formData.manufacturingDate || null,
       expiry_date: formData.expiryDate || null,
+      lot_number: formData.lotNumber || null,
+      document_notes: formData.documentNotes || null,
       location_text: formData.locationText || 'Kho chỉ định',
       status: 'pending_review',
     })
