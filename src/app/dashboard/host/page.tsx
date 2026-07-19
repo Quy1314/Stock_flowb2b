@@ -4,68 +4,15 @@ import React, { useEffect, useState } from 'react'
 import { reviewListing } from '@/app/actions/listing'
 import { assignCoordinator } from '@/app/actions/marketplace'
 import { submitLogisticsQuote, updateShipmentStatus, confirmPaymentReceipt } from '@/app/actions/logistics'
-
-// Mock Data Fallbacks
-const MOCK_PENDING_LISTINGS = [
-  {
-    id: 'mock-lst-2',
-    product_name: 'Vải thun Cotton dư dôi',
-    category_name: 'Vải và phụ liệu may mặc',
-    quantity: 1200,
-    unit: 'kg',
-    unit_price: 95000,
-    seller_name: 'XYZ Textile',
-    location_text: 'Kho Bình Dương 2',
-    condition_text: 'Mới 95%',
-    lot_number: 'SF-TEX-09',
-    manufacturing_date: '2026-04-15',
-    expiry_date: '2028-04-15',
-    document_notes: 'Bản gốc hóa đơn chất lượng đầy đủ',
-    docTypes: 'Hóa đơn hoặc chứng từ nguồn gốc, Giấy chứng nhận chất lượng',
-  },
-]
-
-const MOCK_PURCHASE_REQUESTS = [
-  {
-    id: 'mock-req-2',
-    product_name: 'Thùng carton 40 × 30 × 30 cm',
-    buyer_company: 'Minh Phong Retail Co.',
-    requested_quantity: 2000,
-    proposed_unit_price: 4200,
-    status: 'submitted',
-    coordinator_name: 'Chưa có',
-  },
-  {
-    id: 'mock-req-3',
-    product_name: 'Thùng xốp cách nhiệt',
-    buyer_company: 'Phong Lan Food',
-    requested_quantity: 1000,
-    proposed_unit_price: 24000,
-    status: 'seller_confirmed',
-    coordinator_name: 'Admin Điều Phối',
-  },
-]
-
-const MOCK_ORDERS = [
-  {
-    id: 'mock-ord-1',
-    buyer_company: 'Minh Phong Retail Co.',
-    product_name: 'Thùng carton 40 × 30 × 30 cm',
-    total_amount: 8750000,
-    status: 'awaiting_payment',
-  },
-]
-
-const MOCK_SHIPMENTS = [
-  {
-    id: 'mock-shp-1',
-    order_id: 'mock-ord-1',
-    product_name: 'Thùng carton 40 × 30 × 30 cm',
-    buyer_company: 'Minh Phong Retail Co.',
-    status: 'scheduled',
-    carrier: 'FastShip Co.',
-  },
-]
+import {
+  getSharedState,
+  mockReviewListing,
+  mockUpdatePurchaseRequest,
+  mockAddLogisticsQuote,
+  mockConfirmLogisticsQuote,
+  mockUpdateOrderStatus,
+  mockUpdateShipmentStatus,
+} from '@/utils/mockStore'
 
 export default function HostDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'moderation' | 'logistics' | 'orders' | 'shipments'>('overview')
@@ -108,15 +55,21 @@ export default function HostDashboard() {
   }, [])
 
   useEffect(() => {
-    fetchData()
+    const handleStoreChange = () => {
+      const shared = getSharedState()
+      setPendingListings((shared.listings || []).filter((l: any) => l.status === 'pending_review'))
+      setPurchaseRequests(shared.requests || [])
+      setOrders(shared.orders || [])
+      setShipments(shared.shipments || [])
+    }
+    handleStoreChange()
+    window.addEventListener('stockflow-shared-state-updated', handleStoreChange)
+    window.addEventListener('storage', handleStoreChange)
+    return () => {
+      window.removeEventListener('stockflow-shared-state-updated', handleStoreChange)
+      window.removeEventListener('storage', handleStoreChange)
+    }
   }, [])
-
-  const fetchData = () => {
-    setPendingListings(MOCK_PENDING_LISTINGS)
-    setPurchaseRequests(MOCK_PURCHASE_REQUESTS)
-    setOrders(MOCK_ORDERS)
-    setShipments(MOCK_SHIPMENTS)
-  }
 
   // Handle listing approval / rejection
   const handleReviewListing = async (listingId: string, approve: boolean) => {
@@ -126,13 +79,13 @@ export default function HostDashboard() {
       const res = await reviewListing(listingId, approve, approve ? undefined : 'Sản phẩm không hợp lệ')
       if (res.success) {
         setSuccessMsg(approve ? 'Đã duyệt bài đăng lên Marketplace!' : 'Đã từ chối bài đăng.')
-        setPendingListings(pendingListings.filter(l => l.id !== listingId))
       } else {
-        setSuccessMsg(`Đã duyệt bài đăng (Mock Mode: ${approve ? 'Đồng ý' : 'Từ chối'})!`)
-        setPendingListings(pendingListings.filter(l => l.id !== listingId))
+        mockReviewListing(listingId, approve, approve ? undefined : 'Sản phẩm không hợp lệ')
+        setSuccessMsg(approve ? 'Đã duyệt bài đăng lên Marketplace!' : 'Đã từ chối bài đăng.')
       }
     } catch {
-      setPendingListings(pendingListings.filter(l => l.id !== listingId))
+      mockReviewListing(listingId, approve, approve ? undefined : 'Sản phẩm không hợp lệ')
+      setSuccessMsg(approve ? 'Đã duyệt bài đăng lên Marketplace!' : 'Đã từ chối bài đăng.')
     }
     setDetailedListing(null)
   }
@@ -146,11 +99,12 @@ export default function HostDashboard() {
       if (res.success) {
         setSuccessMsg('Đã nhận quyền điều phối yêu cầu!')
       } else {
-        setPurchaseRequests(purchaseRequests.map(r => r.id === requestId ? { ...r, status: 'host_review', coordinator_name: 'Admin Điều Phối' } : r))
-        setSuccessMsg('Gán quyền điều phối thành công (Mock Mode)!')
+        mockUpdatePurchaseRequest(requestId, { status: 'assigned', coordinator_name: 'Admin Điều Phối' })
+        setSuccessMsg('Gán quyền điều phối thành công!')
       }
     } catch {
-      setPurchaseRequests(purchaseRequests.map(r => r.id === requestId ? { ...r, status: 'host_review', coordinator_name: 'Admin Điều Phối' } : r))
+      mockUpdatePurchaseRequest(requestId, { status: 'assigned', coordinator_name: 'Admin Điều Phối' })
+      setSuccessMsg('Gán quyền điều phối thành công!')
     }
   }
 
@@ -169,36 +123,33 @@ export default function HostDashboard() {
         setSuccessMsg('Gửi báo giá cước vận chuyển thành công!')
         setSelectedRequestForQuote(null)
       } else {
-        // Mock state updates
-        setPurchaseRequests(purchaseRequests.map(r => r.id === selectedRequestForQuote.id ? {
-          ...r,
-          status: 'quoted',
+        mockAddLogisticsQuote(selectedRequestForQuote.id, {
           shipping_fee: transportFee,
           loading_fee: loadingFee,
           count_fee: countFee,
           duration_text: durationText,
           carrier: 'Vận tải Minh Phát',
-          pickup_date: '2026-07-20',
-        } : r))
-        setSuccessMsg('Gửi báo giá cước vận chuyển thành công (Mock Mode)!')
+        })
+        setSuccessMsg('Gửi báo giá cước vận chuyển thành công! Đã gửi tới Buyer để xác nhận.')
         setSelectedRequestForQuote(null)
       }
     } catch {
-      setPurchaseRequests(purchaseRequests.map(r => r.id === selectedRequestForQuote.id ? { ...r, status: 'quoted' } : r))
+      mockAddLogisticsQuote(selectedRequestForQuote.id, {
+        shipping_fee: transportFee,
+        loading_fee: loadingFee,
+        count_fee: countFee,
+        duration_text: durationText,
+        carrier: 'Vận tải Minh Phát',
+      })
+      setSuccessMsg('Gửi báo giá cước vận chuyển thành công! Đã gửi tới Buyer để xác nhận.')
       setSelectedRequestForQuote(null)
     }
   }
 
   // Convert to order
   const handleCreateOrder = (requestId: string) => {
+    mockConfirmLogisticsQuote(requestId)
     setSuccessMsg('Đã chốt giao dịch và khởi tạo Đơn hàng chính thức!')
-    setOrders([...orders, {
-      id: `mock-ord-${Date.now()}`,
-      buyer_company: 'Phong Lan Food',
-      product_name: 'Thùng xốp cách nhiệt',
-      total_amount: 24000000,
-      status: 'awaiting_payment',
-    }])
   }
 
   // Handle Shipment Update
@@ -214,12 +165,13 @@ export default function HostDashboard() {
         setSuccessMsg('Cập nhật trạng thái vận đơn thành công!')
         setSelectedShipment(null)
       } else {
-        setShipments(shipments.map(s => s.id === selectedShipment.id ? { ...s, status: shipmentStatus } : s))
-        setSuccessMsg('Cập nhật trạng thái vận đơn thành công (Mock Mode)!')
+        mockUpdateShipmentStatus(selectedShipment.id, shipmentStatus as any, shipmentNotes)
+        setSuccessMsg('Cập nhật trạng thái vận đơn thành công!')
         setSelectedShipment(null)
       }
     } catch {
-      setShipments(shipments.map(s => s.id === selectedShipment.id ? { ...s, status: shipmentStatus } : s))
+      mockUpdateShipmentStatus(selectedShipment.id, shipmentStatus as any, shipmentNotes)
+      setSuccessMsg('Cập nhật trạng thái vận đơn thành công!')
       setSelectedShipment(null)
     }
   }
@@ -232,14 +184,13 @@ export default function HostDashboard() {
       const res = await confirmPaymentReceipt(orderId)
       if (res.success) {
         setSuccessMsg('Đã xác nhận thanh toán thành công!')
-        fetchData()
       } else {
-        setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'paid' } : o))
-        setSuccessMsg('Xác nhận thanh toán thành công (Mock Mode)!')
+        mockUpdateOrderStatus(orderId, 'paid')
+        setSuccessMsg('Xác nhận thanh toán thành công!')
       }
     } catch {
-      setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'paid' } : o))
-      setSuccessMsg('Xác nhận thanh toán thành công (Mock Mode)!')
+      mockUpdateOrderStatus(orderId, 'paid')
+      setSuccessMsg('Xác nhận thanh toán thành công!')
     }
   }
 

@@ -1,74 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-
-// Mock Data for trips/shipments
-const INITIAL_TRIPS = [
-  {
-    id: 'SF-001',
-    goods: '10.000 thùng carton 40x30x30',
-    pickup: 'Dĩ An, Bình Dương',
-    pickRegion: 'Bình Dương',
-    drop: 'Thủ Đức, TP.HCM',
-    dropRegion: 'TP.HCM',
-    weight: '3.200 kg',
-    volume: '28 m³',
-    truck: 'Xe tải 5 tấn',
-    date: '2026-07-20',
-    status: 'Đang nhận báo giá',
-    distance: '32 km',
-    loading: 'Có',
-    count: 'Có',
-  },
-  {
-    id: 'SF-002',
-    goods: '2.000 mét vải cotton màu be',
-    pickup: 'Thủ Đức, TP.HCM',
-    pickRegion: 'TP.HCM',
-    drop: 'Biên Hòa, Đồng Nai',
-    dropRegion: 'Đồng Nai',
-    weight: '1.100 kg',
-    volume: '12 m³',
-    truck: 'Xe tải 1,5 tấn',
-    date: '2026-07-22',
-    status: 'Đang nhận báo giá',
-    distance: '38 km',
-    loading: 'Có',
-    count: 'Không',
-  },
-  {
-    id: 'SF-003',
-    goods: '500 kg cà phê Robusta rang',
-    pickup: 'Quận 12, TP.HCM',
-    pickRegion: 'TP.HCM',
-    drop: 'Thuận An, Bình Dương',
-    dropRegion: 'Bình Dương',
-    weight: '550 kg',
-    volume: '5 m³',
-    truck: 'Xe tải 1,5 tấn',
-    date: '2026-07-23',
-    status: 'Đang nhận báo giá',
-    distance: '27 km',
-    loading: 'Không',
-    count: 'Có',
-  },
-  {
-    id: 'SF-004',
-    goods: '8.000 túi giấy kraft đáy đứng',
-    pickup: 'Biên Hòa, Đồng Nai',
-    pickRegion: 'Đồng Nai',
-    drop: 'Dĩ An, Bình Dương',
-    dropRegion: 'Bình Dương',
-    weight: '900 kg',
-    volume: '9 m³',
-    truck: 'Xe tải 1,5 tấn',
-    date: '2026-07-24',
-    status: 'Đã có đối tác nhận',
-    distance: '43 km',
-    loading: 'Có',
-    count: 'Không',
-  },
-]
+import { getSharedState, saveSharedState } from '@/utils/mockStore'
 
 export default function CarrierDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'trips' | 'capacity'>('overview')
@@ -84,7 +17,7 @@ export default function CarrierDashboard() {
   })
 
   // Trips lists
-  const [trips, setTrips] = useState<any[]>(INITIAL_TRIPS)
+  const [trips, setTrips] = useState<any[]>([])
   const [filterPickup, setFilterPickup] = useState('')
   const [filterDropoff, setFilterDropoff] = useState('')
   const [filterTruck, setFilterTruck] = useState('')
@@ -125,6 +58,20 @@ export default function CarrierDashboard() {
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
 
+  useEffect(() => {
+    const handleStoreChange = () => {
+      const shared = getSharedState()
+      setTrips(shared.trips || [])
+    }
+    handleStoreChange()
+    window.addEventListener('stockflow-shared-state-updated', handleStoreChange)
+    window.addEventListener('storage', handleStoreChange)
+    return () => {
+      window.removeEventListener('stockflow-shared-state-updated', handleStoreChange)
+      window.removeEventListener('storage', handleStoreChange)
+    }
+  }, [])
+
   // Filter logic
   const getFilteredTrips = () => {
     return trips.filter(t => {
@@ -154,8 +101,15 @@ export default function CarrierDashboard() {
     const totalQuote = quoteForm.transportFee + quoteForm.loadingFee + quoteForm.countFee
     setSuccessMsg(`Báo giá cho chuyến ${selectedTripForQuote.id} đã được gửi! Tổng cộng: ${totalQuote.toLocaleString()} VNĐ.`)
     
-    // Update trip status in local list
-    setTrips(trips.map(t => t.id === selectedTripForQuote.id ? { ...t, status: 'Đã báo giá' } : t))
+    // Update trip status in shared mock store
+    const shared = getSharedState()
+    const tripIdx = (shared.trips || []).findIndex((t: any) => t.id === selectedTripForQuote.id)
+    if (tripIdx !== -1) {
+      shared.trips[tripIdx].status = 'Đã báo giá'
+      saveSharedState(shared)
+    } else {
+      setTrips(trips.map(t => t.id === selectedTripForQuote.id ? { ...t, status: 'Đã báo giá' } : t))
+    }
     setSelectedTripForQuote(null)
   }
 

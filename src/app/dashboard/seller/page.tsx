@@ -4,60 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { createListing, getListings } from '@/app/actions/listing'
 import { createWarehouse, getWarehouses } from '@/app/actions/warehouse'
 import { respondPurchaseRequest } from '@/app/actions/marketplace'
-
-// Mock Data fallbacks
-const MOCK_LISTINGS = [
-  {
-    id: 'mock-lst-1',
-    product_name: 'Bao bì Carton 5 lớp',
-    category_name: 'Bao bì và vật tư đóng gói',
-    quantity: 5000,
-    reserved_quantity: 2000,
-    available_quantity: 3000,
-    unit: 'cái',
-    unit_price: 4500,
-    status: 'approved',
-    location_text: 'Kho Hà Nội 1',
-    lot_number: 'SF-PK-01',
-    document_notes: 'Có CO/CQ đầy đủ',
-  },
-  {
-    id: 'mock-lst-2',
-    product_name: 'Vải thun Cotton dư dôi',
-    category_name: 'Vải và phụ liệu may mặc',
-    quantity: 1200,
-    reserved_quantity: 0,
-    available_quantity: 1200,
-    unit: 'kg',
-    unit_price: 95000,
-    status: 'pending_review',
-    location_text: 'Kho Bình Dương 2',
-    lot_number: 'SF-TEX-09',
-    document_notes: 'Hóa đơn VAT nguồn gốc',
-  },
-]
-
-const MOCK_WAREHOUSES = [
-  {
-    id: 'mock-wh-1',
-    name: 'Kho Hà Nội 1',
-    phone: '0987654321',
-    address: '123 Đường Láng',
-    city: 'Hà Nội',
-  },
-]
-
-const MOCK_REQUESTS = [
-  {
-    id: 'mock-req-1',
-    product_name: 'Bao bì Carton 5 lớp',
-    buyer_company: 'Minh Phong Retail Co.',
-    requested_quantity: 2000,
-    proposed_unit_price: 4200,
-    buyer_note: 'Cần giao gấp trong tuần tới',
-    status: 'submitted',
-  },
-]
+import { getSharedState, mockAddListing, mockUpdatePurchaseRequest } from '@/utils/mockStore'
 
 export default function SellerDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'requests' | 'warehouses'>('overview')
@@ -126,21 +73,33 @@ export default function SellerDashboard() {
   }, [])
 
   useEffect(() => {
-    fetchData()
+    const handleStoreChange = () => {
+      const shared = getSharedState()
+      setListings(shared.listings || [])
+      setRequests(shared.requests || [])
+    }
+    handleStoreChange()
+    window.addEventListener('stockflow-shared-state-updated', handleStoreChange)
+    window.addEventListener('storage', handleStoreChange)
+    return () => {
+      window.removeEventListener('stockflow-shared-state-updated', handleStoreChange)
+      window.removeEventListener('storage', handleStoreChange)
+    }
   }, [])
 
   const fetchData = async () => {
     try {
       const realListings = await getListings()
       const realWarehouses = await getWarehouses()
+      const shared = getSharedState()
 
-      setListings(realListings.length > 0 ? realListings : MOCK_LISTINGS)
-      setWarehouses(realWarehouses.length > 0 ? realWarehouses : MOCK_WAREHOUSES)
-      setRequests(MOCK_REQUESTS)
+      setListings(realListings.length > 0 ? realListings : shared.listings)
+      setWarehouses(realWarehouses.length > 0 ? realWarehouses : [{ id: 'wh-1', name: 'Kho Hà Nội 1', phone: '0987654321', address: '123 Đường Láng', city: 'Hà Nội' }])
+      setRequests(shared.requests)
     } catch {
-      setListings(MOCK_LISTINGS)
-      setWarehouses(MOCK_WAREHOUSES)
-      setRequests(MOCK_REQUESTS)
+      const shared = getSharedState()
+      setListings(shared.listings)
+      setRequests(shared.requests)
     }
   }
 
@@ -276,23 +235,23 @@ export default function SellerDashboard() {
         setShowListingModal(false)
         fetchData()
       } else {
-        // Mock fallback insertion for demo mode
-        const mockNew = {
-          id: `mock-lst-${Date.now()}`,
+        // Mock store insertion for instant demo mode
+        mockAddListing({
           product_name: newListing.productName,
           category_name: previewObj.category_name,
+          category_id: newListing.categoryId,
           quantity: newListing.quantity,
-          reserved_quantity: 0,
-          available_quantity: newListing.quantity,
           unit: newListing.unit,
           unit_price: newListing.unitPrice,
-          status: 'pending_review',
+          condition_text: newListing.conditionText,
           location_text: previewObj.location_text,
           lot_number: newListing.lotNumber,
+          manufacturing_date: newListing.manufacturingDate,
+          expiry_date: newListing.expiryDate,
           document_notes: docNotes,
-        }
-        setListings([mockNew, ...listings])
-        setSuccessMsg('Đăng sản phẩm thành công (Mock Mode)!')
+          docTypes: selectedDocTypes.join(', '),
+        })
+        setSuccessMsg('Đăng sản phẩm thành công! Listing đã được gửi tới Host để duyệt.')
         setCreatedPreview(previewObj)
         setShowListingModal(false)
       }
@@ -322,7 +281,7 @@ export default function SellerDashboard() {
           city: newWarehouse.city,
         }
         setWarehouses([...warehouses, mockNewWh])
-        setSuccessMsg('Thêm kho thành công (Mock Mode)!')
+        setSuccessMsg('Thêm kho thành công!')
         setShowWarehouseModal(false)
       }
     } catch (err: any) {
@@ -336,11 +295,12 @@ export default function SellerDashboard() {
       if (res.success) {
         setSuccessMsg(approve ? 'Đã chấp thuận yêu cầu mua' : 'Đã từ chối yêu cầu mua')
       } else {
-        setRequests(requests.map(r => r.id === requestId ? { ...r, status: approve ? 'seller_confirmed' : 'seller_rejected' } : r))
-        setSuccessMsg(`Đã cập nhật yêu cầu mua (Mock Mode: ${approve ? 'Chấp thuận' : 'Từ chối'})!`)
+        mockUpdatePurchaseRequest(requestId, { status: approve ? 'seller_confirmed' : 'seller_rejected' })
+        setSuccessMsg(`Đã cập nhật yêu cầu mua (${approve ? 'Chấp thuận' : 'Từ chối'})!`)
       }
     } catch {
-      setRequests(requests.map(r => r.id === requestId ? { ...r, status: approve ? 'seller_confirmed' : 'seller_rejected' } : r))
+      mockUpdatePurchaseRequest(requestId, { status: approve ? 'seller_confirmed' : 'seller_rejected' })
+      setSuccessMsg(`Đã cập nhật yêu cầu mua (${approve ? 'Chấp thuận' : 'Từ chối'})!`)
     }
   }
 

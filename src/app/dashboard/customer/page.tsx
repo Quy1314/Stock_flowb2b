@@ -6,77 +6,12 @@ import { approveLogisticsQuote, submitPaymentReceipt } from '@/app/actions/logis
 import { getWarehouses } from '@/app/actions/warehouse'
 import { uploadPaymentReceipt } from '@/app/actions/storage'
 import { createClient as createBrowserClient } from '@/utils/supabase/client'
-
-// Mock Data Fallbacks
-const MOCK_MARKETPLACE = [
-  {
-    id: 'mock-lst-1',
-    product_name: 'Thùng carton 40 × 30 × 30 cm',
-    category_name: 'Bao bì và vật tư đóng gói',
-    available_quantity: 10000,
-    unit: 'thùng',
-    unit_price: 4200,
-    condition_text: 'Mới 100%',
-    location_text: 'Dĩ An, Bình Dương',
-    seller_name: 'ABC Packaging JSC',
-    lot_number: 'SF-PK-01',
-    manufacturing_date: '2026-06-01',
-    expiry_date: '2027-06-01',
-  },
-  {
-    id: 'mock-lst-2',
-    product_name: 'Túi giấy kraft đáy đứng',
-    category_name: 'Bao bì và vật tư đóng gói',
-    available_quantity: 8000,
-    unit: 'túi',
-    unit_price: 2500,
-    condition_text: 'Hàng mới 100%',
-    location_text: 'Long Thành, Đồng Nai',
-    seller_name: 'Phương Nam Box',
-    lot_number: 'SF-PK-02',
-    manufacturing_date: '2026-05-10',
-    expiry_date: '2027-05-10',
-  },
-  {
-    id: 'mock-lst-3',
-    product_name: 'Vải cotton màu be cuộn',
-    category_name: 'Vải và phụ liệu may mặc',
-    available_quantity: 2000,
-    unit: 'mét',
-    unit_price: 65000,
-    condition_text: 'Mới 98%',
-    location_text: 'Tân Bình, TP.HCM',
-    seller_name: 'XYZ Textile',
-    lot_number: 'SF-TEX-09',
-    manufacturing_date: '2026-04-15',
-    expiry_date: '2028-04-15',
-  },
-]
-
-const MOCK_WAREHOUSES = [
-  {
-    id: 'mock-wh-buyer-1',
-    name: 'Kho Nhận Cầu Giấy',
-    address: '456 Đường Nguyễn Phong Sắc',
-    city: 'Hà Nội',
-  },
-]
-
-const MOCK_MY_REQUESTS = [
-  {
-    id: 'mock-req-1',
-    product_name: 'Thùng carton 40 × 30 × 30 cm',
-    requested_quantity: 2000,
-    proposed_unit_price: 4200,
-    status: 'quoted', // submitted -> host_review -> quoted -> buyer_confirmed
-    shipping_fee: 350000,
-    loading_fee: 50000,
-    count_fee: 30000,
-    carrier: 'FastShip Co.',
-    duration_text: '4 giờ',
-    pickup_date: '2026-07-20',
-  },
-]
+import {
+  getSharedState,
+  mockCreatePurchaseRequest,
+  mockConfirmLogisticsQuote,
+  mockUpdateOrderStatus,
+} from '@/utils/mockStore'
 
 export default function CustomerDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'marketplace' | 'requests' | 'warehouses'>('overview')
@@ -120,34 +55,29 @@ export default function CustomerDashboard() {
   }, [])
 
   useEffect(() => {
-    fetchData()
-  }, [searchQuery, selectedCategory, selectedLocation])
-
-  const fetchData = async () => {
-    try {
-      const realMarket = await getMarketplaceListings({
-        search: searchQuery || undefined,
-        categoryId: selectedCategory === 'all' ? undefined : parseInt(selectedCategory),
-      })
-      const realWarehouses = await getWarehouses()
-
-      // filter mock listings
-      const filteredMocks = MOCK_MARKETPLACE.filter(l => {
-        const matchSearch = l.product_name.toLowerCase().includes(searchQuery.toLowerCase())
-        const matchCat = selectedCategory === 'all' || l.category_name.includes(selectedCategory)
-        const matchLoc = selectedLocation === 'all' || l.location_text.includes(selectedLocation)
+    const handleStoreChange = () => {
+      const shared = getSharedState()
+      const approvedListings = (shared.listings || []).filter((l: any) => l.status === 'approved')
+      
+      const filtered = approvedListings.filter((l: any) => {
+        const matchSearch = (l.product_name || '').toLowerCase().includes(searchQuery.toLowerCase())
+        const matchCat = selectedCategory === 'all' || (l.category_name || '').includes(selectedCategory)
+        const matchLoc = selectedLocation === 'all' || (l.location_text || '').includes(selectedLocation)
         return matchSearch && matchCat && matchLoc
       })
 
-      setListings(realMarket.length > 0 ? realMarket : filteredMocks)
-      setWarehouses(realWarehouses.length > 0 ? realWarehouses : MOCK_WAREHOUSES)
-      setMyRequests(MOCK_MY_REQUESTS)
-    } catch {
-      setListings(MOCK_MARKETPLACE)
-      setWarehouses(MOCK_WAREHOUSES)
-      setMyRequests(MOCK_MY_REQUESTS)
+      setListings(filtered)
+      setMyRequests(shared.requests || [])
+      setWarehouses([{ id: 'wh-b1', name: 'Kho Nhận Cầu Giấy', address: '456 Nguyễn Phong Sắc', city: 'Hà Nội' }])
     }
-  }
+    handleStoreChange()
+    window.addEventListener('stockflow-shared-state-updated', handleStoreChange)
+    window.addEventListener('storage', handleStoreChange)
+    return () => {
+      window.removeEventListener('stockflow-shared-state-updated', handleStoreChange)
+      window.removeEventListener('storage', handleStoreChange)
+    }
+  }, [searchQuery, selectedCategory, selectedLocation])
 
   // Handle purchase request submit
   const handleSubmitRequest = async (e: React.FormEvent) => {
@@ -171,26 +101,31 @@ export default function CustomerDashboard() {
       if (res.success) {
         setSuccessMsg('Gửi yêu cầu đặt mua thành công!')
         setSelectedListing(null)
-        fetchData()
       } else {
-        // Mock fallback update
-        const mockNewReq = {
-          id: `mock-req-${Date.now()}`,
+        mockCreatePurchaseRequest({
+          listing_id: selectedListing.id,
           product_name: selectedListing.product_name,
+          buyer_company: buyerCompany || 'Doanh nghiệp mua sỉ',
+          buyer_contact: buyerContact,
           requested_quantity: requestQty,
           proposed_unit_price: proposedPrice,
-          status: 'submitted',
-          shipping_fee: 0,
-          loading_fee: 0,
-          count_fee: 0,
-          carrier: '',
-        }
-        setMyRequests([mockNewReq, ...myRequests])
-        setSuccessMsg('Gửi yêu cầu đặt mua thành công (Mock Mode)!')
+          seller_name: selectedListing.seller_name,
+        })
+        setSuccessMsg('Gửi yêu cầu đặt mua thành công! Đã chuyển tới Seller và Host.')
         setSelectedListing(null)
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Lỗi xảy ra.')
+      mockCreatePurchaseRequest({
+        listing_id: selectedListing.id,
+        product_name: selectedListing.product_name,
+        buyer_company: buyerCompany || 'Doanh nghiệp mua sỉ',
+        buyer_contact: buyerContact,
+        requested_quantity: requestQty,
+        proposed_unit_price: proposedPrice,
+        seller_name: selectedListing.seller_name,
+      })
+      setSuccessMsg('Gửi yêu cầu đặt mua thành công! Đã chuyển tới Seller và Host.')
+      setSelectedListing(null)
     }
   }
 
@@ -203,13 +138,13 @@ export default function CustomerDashboard() {
       const res = await approveLogisticsQuote(requestId)
       if (res.success) {
         setSuccessMsg('Đã chấp thuận báo giá vận chuyển!')
-        fetchData()
       } else {
-        setMyRequests(myRequests.map(r => r.id === requestId ? { ...r, status: 'buyer_confirmed' } : r))
-        setSuccessMsg('Chấp thuận báo giá vận chuyển thành công (Mock Mode)!')
+        mockConfirmLogisticsQuote(requestId)
+        setSuccessMsg('Chấp thuận báo giá vận chuyển thành công! Đã khởi tạo đơn hàng.')
       }
     } catch {
-      setMyRequests(myRequests.map(r => r.id === requestId ? { ...r, status: 'buyer_confirmed' } : r))
+      mockConfirmLogisticsQuote(requestId)
+      setSuccessMsg('Chấp thuận báo giá vận chuyển thành công! Đã khởi tạo đơn hàng.')
     }
   }
 
@@ -247,15 +182,17 @@ export default function CustomerDashboard() {
         setSuccessMsg('Đã tải lên biên lai chuyển khoản thành công. Đang chờ Host xác nhận.')
         setPaymentRequest(null)
         setPaymentFile(null)
-        fetchData()
       } else {
-        setMyRequests(myRequests.map(r => r.id === paymentRequest.id ? { ...r, status: 'awaiting_payment' } : r))
-        setSuccessMsg('Tải lên biên lai chuyển khoản thành công (Mock Mode)!')
+        mockUpdateOrderStatus(paymentRequest.order_id || 'ORD-001', 'awaiting_payment', filePath)
+        setSuccessMsg('Tải lên biên lai chuyển khoản thành công! Đã thông báo tới Host xác nhận.')
         setPaymentRequest(null)
         setPaymentFile(null)
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Lỗi xảy ra trong quá trình thanh toán.')
+      mockUpdateOrderStatus(paymentRequest.order_id || 'ORD-001', 'awaiting_payment')
+      setSuccessMsg('Tải lên biên lai chuyển khoản thành công! Đã thông báo tới Host xác nhận.')
+      setPaymentRequest(null)
+      setPaymentFile(null)
     } finally {
       setIsUploadingPayment(false)
     }
