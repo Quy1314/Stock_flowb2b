@@ -196,27 +196,6 @@ export default function LoginPage() {
               {error}
             </p>
           )}
-
-          {/* ── Dev-only mock role ─────────────────────────── */}
-          <div className="sf-dev-only mt-6 p-4 border border-[var(--primary-subtle)] bg-[var(--surface-sunken)] rounded-xl">
-            <p className="sf-dev-only-label font-bold text-[var(--primary-dark)] text-xs mb-2">🔧 Dành cho Lập trình viên</p>
-            <label htmlFor="mock-role-select" className="sf-label text-xs" style={{ color: 'var(--ink-muted)' }}>
-              Mô phỏng Vai trò
-            </label>
-            <select
-              id="mock-role-select"
-              value={mockRole}
-              onChange={(e) => setMockRole(e.target.value as any)}
-              className="sf-select text-xs"
-              style={{ borderRadius: 'var(--radius-md)', padding: '6px 12px' }}
-            >
-              <option value="none">Không mô phỏng (Dùng Auth thật)</option>
-              <option value="customer">Người mua (Customer)</option>
-              <option value="seller">Người bán (Seller)</option>
-              <option value="host">Điều phối viên (Host)</option>
-              <option value="carrier">Đơn vị vận tải (Carrier)</option>
-            </select>
-          </div>
         </form>
 
         <p

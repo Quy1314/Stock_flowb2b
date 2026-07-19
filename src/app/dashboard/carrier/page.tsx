@@ -401,16 +401,25 @@ export default function CarrierDashboard() {
               <p className="border-t border-[var(--border)] pt-3 text-xs italic">Ghi chú: Lô hàng dễ vỡ, cần che chắn mui bạt kín khi trời mưa bão.</p>
             </div>
             
-            <button
-              onClick={() => {
-                const t = selectedTripDetails
-                setSelectedTripDetails(null)
-                setSelectedTripForQuote(t)
-              }}
-              className="sf-btn sf-btn-primary w-full mt-4"
-            >
-              Gửi báo giá ngay
-            </button>
+            <div className="flex items-center gap-3.5 mt-6">
+              <button
+                type="button"
+                onClick={() => setSelectedTripDetails(null)}
+                className="sf-btn sf-btn-ghost flex-1"
+              >
+                Đóng
+              </button>
+              <button
+                onClick={() => {
+                  const t = selectedTripDetails
+                  setSelectedTripDetails(null)
+                  setSelectedTripForQuote(t)
+                }}
+                className="sf-btn sf-btn-primary flex-1"
+              >
+                Gửi báo giá ngay
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -501,9 +510,18 @@ export default function CarrierDashboard() {
                 </label>
               </div>
 
-              <button type="submit" className="sf-btn sf-btn-primary w-full mt-4">
-                Gửi báo giá cước
-              </button>
+              <div className="flex items-center gap-3.5 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTripForQuote(null)}
+                  className="sf-btn sf-btn-ghost flex-1"
+                >
+                  Hủy
+                </button>
+                <button type="submit" className="sf-btn sf-btn-primary flex-1">
+                  Gửi báo giá cước
+                </button>
+              </div>
             </form>
           </div>
         </div>

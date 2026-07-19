@@ -506,9 +506,18 @@ export default function CustomerDashboard() {
                 />
               </div>
 
-              <button type="submit" className="sf-btn sf-btn-primary w-full mt-4">
-                Gửi yêu cầu mua
-              </button>
+              <div className="flex items-center gap-3.5 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setSelectedListing(null)}
+                  className="sf-btn sf-btn-ghost flex-1"
+                >
+                  Hủy
+                </button>
+                <button type="submit" className="sf-btn sf-btn-primary flex-1">
+                  Gửi yêu cầu mua
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -563,13 +572,22 @@ export default function CustomerDashboard() {
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={isUploadingPayment}
-                className="sf-btn sf-btn-primary w-full mt-4"
-              >
-                {isUploadingPayment ? 'Đang tải lên...' : 'Xác nhận đã chuyển khoản'}
-              </button>
+              <div className="flex items-center gap-3.5 mt-6">
+                <button
+                  type="button"
+                  onClick={() => { setPaymentRequest(null); setPaymentFile(null); }}
+                  className="sf-btn sf-btn-ghost flex-1"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUploadingPayment}
+                  className="sf-btn sf-btn-primary flex-1"
+                >
+                  {isUploadingPayment ? 'Đang tải lên...' : 'Xác nhận đã chuyển khoản'}
+                </button>
+              </div>
             </form>
           </div>
         </div>

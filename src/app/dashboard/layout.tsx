@@ -193,16 +193,7 @@ export default function DashboardLayout({
               {userName.substring(0, 2).toUpperCase()}
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h4 className="sf-topbar__company">{companyName}</h4>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                  isSupabaseConfigured() 
-                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' 
-                    : 'bg-amber-100 text-amber-800 border border-amber-300'
-                }`}>
-                  {isSupabaseConfigured() ? '🟢 Supabase Real DB' : '🟠 Demo Mock Mode'}
-                </span>
-              </div>
+              <h4 className="sf-topbar__company">{companyName}</h4>
               <span className="sf-topbar__role">{role ? ROLE_LABELS[role] : ''}</span>
             </div>
           </div>

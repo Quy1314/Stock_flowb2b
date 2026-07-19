@@ -40,12 +40,7 @@ describe('LoginPage (Story 1.2)', () => {
     expect(screen.getByRole('button', { name: /Đăng nhập/i })).toBeInTheDocument()
   })
 
-  it('renders developer mock role selector dropdown', () => {
-    render(<LoginPage />)
-    expect(screen.getByLabelText(/Mô phỏng Vai trò/i)).toBeInTheDocument()
-  })
-
-  it('submits and redirects based on user role on successful auth login', async () => {
+  it('submits and redirects based on seller role on successful auth login', async () => {
     render(<LoginPage />)
     
     const emailInput = screen.getByLabelText(/Email/i)
@@ -61,15 +56,15 @@ describe('LoginPage (Story 1.2)', () => {
     })
   })
 
-  it('submits using developer mock role select and redirects directly', async () => {
+  it('submits and redirects based on host role on successful auth login', async () => {
     render(<LoginPage />)
     
-    const mockSelect = screen.getByLabelText(/Mô phỏng Vai trò/i)
     const emailInput = screen.getByLabelText(/Email/i)
-    fireEvent.change(emailInput, { target: { value: 'host@test.com' } })
-    fireEvent.change(mockSelect, { target: { value: 'host' } })
-    
+    const passwordInput = screen.getByLabelText(/Mật khẩu/i)
     const submitButton = screen.getByRole('button', { name: /Đăng nhập/i })
+
+    fireEvent.change(emailInput, { target: { value: 'host@test.com' } })
+    fireEvent.change(passwordInput, { target: { value: 'Password123' } })
     fireEvent.click(submitButton)
 
     await waitFor(() => {

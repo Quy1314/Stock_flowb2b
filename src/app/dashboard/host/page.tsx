@@ -589,9 +589,18 @@ export default function HostDashboard() {
                 </select>
               </div>
 
-              <button type="submit" className="sf-btn sf-btn-primary w-full mt-4">
-                Xác nhận cước & Gửi báo giá
-              </button>
+              <div className="flex items-center gap-3.5 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setSelectedRequestForQuote(null)}
+                  className="sf-btn sf-btn-ghost flex-1"
+                >
+                  Hủy
+                </button>
+                <button type="submit" className="sf-btn sf-btn-primary flex-1">
+                  Xác nhận cước & Gửi báo giá
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -631,9 +640,18 @@ export default function HostDashboard() {
                 />
               </div>
 
-              <button type="submit" className="sf-btn sf-btn-primary w-full mt-4">
-                Cập nhật vận trình
-              </button>
+              <div className="flex items-center gap-3.5 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setSelectedShipment(null)}
+                  className="sf-btn sf-btn-ghost flex-1"
+                >
+                  Hủy
+                </button>
+                <button type="submit" className="sf-btn sf-btn-primary flex-1">
+                  Cập nhật vận trình
+                </button>
+              </div>
             </form>
           </div>
         </div>

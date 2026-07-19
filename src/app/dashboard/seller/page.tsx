@@ -802,9 +802,18 @@ export default function SellerDashboard() {
                 </label>
               </div>
 
-              <button type="submit" className="sf-btn sf-btn-primary w-full mt-4">
-                Đăng tin thanh lý
-              </button>
+              <div className="flex items-center gap-3.5 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowListingModal(false)}
+                  className="sf-btn sf-btn-ghost flex-1"
+                >
+                  Hủy
+                </button>
+                <button type="submit" className="sf-btn sf-btn-primary flex-1">
+                  Đăng tin thanh lý
+                </button>
+              </div>
             </form>
           </div>
         </div>
@@ -870,9 +879,18 @@ export default function SellerDashboard() {
                 </select>
               </div>
 
-              <button type="submit" className="sf-btn sf-btn-primary w-full mt-4">
-                Khởi tạo kho hàng
-              </button>
+              <div className="flex items-center gap-3.5 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowWarehouseModal(false)}
+                  className="sf-btn sf-btn-ghost flex-1"
+                >
+                  Hủy
+                </button>
+                <button type="submit" className="sf-btn sf-btn-primary flex-1">
+                  Khởi tạo kho hàng
+                </button>
+              </div>
             </form>
           </div>
         </div>
