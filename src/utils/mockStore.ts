@@ -390,7 +390,9 @@ export function mockReviewListing(listingId: string, approve: boolean, reason?: 
     state.listings[idx].status = approve ? 'approved' : 'rejected'
     if (reason) state.listings[idx].rejection_reason = reason
     saveSharedState(state)
+    return state.listings[idx]
   }
+  return null
 }
 
 export function mockCreatePurchaseRequest(req: Partial<SharedPurchaseRequest>): SharedPurchaseRequest {
@@ -413,33 +415,53 @@ export function mockCreatePurchaseRequest(req: Partial<SharedPurchaseRequest>): 
   return request
 }
 
-export function mockUpdatePurchaseRequest(requestId: string, update: Partial<SharedPurchaseRequest>) {
+export function mockUpdatePurchaseRequest(requestId: string, update: Partial<SharedPurchaseRequest> | string) {
   const state = getSharedState()
   const idx = state.requests.findIndex((r: any) => r.id === requestId)
   if (idx !== -1) {
-    state.requests[idx] = { ...state.requests[idx], ...update }
+    const patch = typeof update === 'string' ? { status: update as any } : update
+    state.requests[idx] = { ...state.requests[idx], ...patch }
     saveSharedState(state)
+    return state.requests[idx]
   }
+  return null
 }
 
-export function mockAddLogisticsQuote(requestId: string, quoteData: {
-  shipping_fee: number
-  loading_fee: number
-  count_fee: number
-  duration_text: string
-  carrier?: string
-}) {
+export function mockAddLogisticsQuote(
+  requestId: string,
+  quoteDataOrFee: {
+    shipping_fee: number
+    loading_fee: number
+    count_fee: number
+    duration_text: string
+    carrier?: string
+  } | number,
+  loading_fee?: number,
+  count_fee?: number,
+  carrier?: string,
+  duration_text?: string
+) {
   const state = getSharedState()
   const idx = state.requests.findIndex((r: any) => r.id === requestId)
   if (idx !== -1) {
     state.requests[idx].status = 'quoted'
-    state.requests[idx].shipping_fee = quoteData.shipping_fee
-    state.requests[idx].loading_fee = quoteData.loading_fee
-    state.requests[idx].count_fee = quoteData.count_fee
-    state.requests[idx].duration_text = quoteData.duration_text
-    state.requests[idx].carrier = quoteData.carrier || 'Vận tải Minh Phát'
+    if (typeof quoteDataOrFee === 'object') {
+      state.requests[idx].shipping_fee = quoteDataOrFee.shipping_fee
+      state.requests[idx].loading_fee = quoteDataOrFee.loading_fee
+      state.requests[idx].count_fee = quoteDataOrFee.count_fee
+      state.requests[idx].duration_text = quoteDataOrFee.duration_text
+      state.requests[idx].carrier = quoteDataOrFee.carrier || 'Vận tải Minh Phát'
+    } else {
+      state.requests[idx].shipping_fee = quoteDataOrFee
+      state.requests[idx].loading_fee = loading_fee || 0
+      state.requests[idx].count_fee = count_fee || 0
+      state.requests[idx].carrier = carrier || 'Vận tải Minh Phát'
+      state.requests[idx].duration_text = duration_text || 'Trong ngày'
+    }
     saveSharedState(state)
+    return state.requests[idx]
   }
+  return null
 }
 
 export function mockConfirmLogisticsQuote(requestId: string) {
@@ -474,7 +496,9 @@ export function mockConfirmLogisticsQuote(requestId: string) {
     state.shipments.unshift(newShipment)
 
     saveSharedState(state)
+    return { request: req, order: newOrder, shipment: newShipment }
   }
+  return { request: null, order: null, shipment: null }
 }
 
 export function mockUpdateOrderStatus(orderId: string, status: SharedOrder['status'], receiptUrl?: string) {
@@ -484,7 +508,9 @@ export function mockUpdateOrderStatus(orderId: string, status: SharedOrder['stat
     order.status = status
     if (receiptUrl) order.payment_receipt_url = receiptUrl
     saveSharedState(state)
+    return order
   }
+  return null
 }
 
 export function mockUpdateShipmentStatus(shipmentId: string, status: SharedShipment['status'], notes?: string) {
@@ -494,5 +520,20 @@ export function mockUpdateShipmentStatus(shipmentId: string, status: SharedShipm
     shp.status = status
     if (notes) shp.notes = notes
     saveSharedState(state)
+    return shp
   }
+  return null
+}
+
+export function mockAddQuoteToTrip(tripId: string, quote: NonNullable<SharedLogisticsTrip['quotes']>[number]) {
+  const state = getSharedState()
+  const trip = state.trips.find((t: any) => t.id === tripId)
+  if (trip) {
+    if (!trip.quotes) trip.quotes = []
+    trip.quotes.unshift(quote)
+    trip.status = 'Đã báo giá'
+    saveSharedState(state)
+    return trip
+  }
+  return null
 }
