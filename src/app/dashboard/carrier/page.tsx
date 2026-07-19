@@ -149,24 +149,24 @@ export default function CarrierDashboard() {
             <div>
               <h2 className="text-xl font-bold mb-1">Công ty TNHH Vận tải Minh Phát</h2>
               <p className="text-sm text-[var(--ink-secondary)] mb-2">TP.HCM – Bình Dương – Đồng Nai · Đội xe chuyên nghiệp</p>
-              <span className="sf-badge sf-badge-primary">Đối tác vận chuyển đã xác minh</span>
+              <span className="sf-badge sf-badge-primary">{t('carrier_ui.partner_verified', lang)}</span>
             </div>
             <button onClick={() => setShowCapacityModal(true)} className="sf-btn sf-btn-primary">
-              ⚙️ Cập nhật Năng lực vận hành
+              {t('carrier_ui.update_capacity_btn', lang)}
             </button>
           </div>
 
           <div className="metrics-grid">
             <div className="metric-card">
-              <span>Đội xe sẵn sàng</span>
-              <h3>{capacity.readyTrucks} xe</h3>
+              <span>{t('carrier_ui.ready_trucks', lang)}</span>
+              <h3>{capacity.readyTrucks} {lang === 'ja' ? '台' : 'xe'}</h3>
             </div>
             <div className="metric-card">
-              <span>Chuyến hàng khả dụng</span>
-              <h3>{trips.filter(t => t.status === 'Đang nhận báo giá').length} chuyến</h3>
+              <span>{t('carrier_ui.available_trips', lang)}</span>
+              <h3>{trips.filter(t => t.status === 'Đang nhận báo giá').length} {lang === 'ja' ? '件' : 'chuyến'}</h3>
             </div>
             <div className="metric-card">
-              <span>Đánh giá hoàn thành</span>
+              <span>{t('carrier_ui.completion_rate', lang)}</span>
               <h3>98.5%</h3>
             </div>
           </div>
@@ -204,7 +204,7 @@ export default function CarrierDashboard() {
 
           {/* Ongoing trip control panel */}
           <section className="sf-card bg-[var(--surface-sunken)]">
-            <h2 className="text-base font-extrabold mb-3">Chuyến hàng đang đảm nhận: SF-005</h2>
+            <h2 className="text-base font-extrabold mb-3">{t('carrier_ui.ongoing_trip', lang)} SF-005</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2 text-sm text-[var(--ink-secondary)]">
                 <p className="m-0">📦 <strong>Mặt hàng:</strong> Vải thun dệt kim sỉ</p>
@@ -214,7 +214,7 @@ export default function CarrierDashboard() {
 
               <div className="space-y-4">
                 <div className="form-group">
-                  <label className="sf-label">Cập nhật hành trình vận đơn</label>
+                  <label className="sf-label">{t('carrier_ui.status_updated', lang)}</label>
                   <div className="flex items-center gap-3">
                     <select
                       value={myTripStatus}
@@ -229,13 +229,13 @@ export default function CarrierDashboard() {
                       <option value="Đã giao hàng thành công">Đã giao hàng thành công</option>
                     </select>
                     <button onClick={() => setSuccessMsg(`Đã cập nhật trạng thái vận đơn: ${myTripStatus}`)} className="sf-btn sf-btn-primary">
-                      Cập nhật
+                      {t('action.confirm', lang)}
                     </button>
                   </div>
                 </div>
 
                 <div className="form-group">
-                  <label className="sf-label">Tải ảnh/bằng chứng giao nhận (Proof of Delivery)</label>
+                  <label className="sf-label">{t('carrier_ui.update_pod_btn', lang)}</label>
                   <input
                     type="file"
                     multiple
@@ -259,11 +259,69 @@ export default function CarrierDashboard() {
         </div>
       )}
 
+      {/* ── Tab: Capacity ── */}
+      {activeTab === 'capacity' && (
+        <section className="sf-card max-w-2xl">
+          <div className="section-header">
+            <h2>{t('carrier_ui.capacity_modal_title', lang)}</h2>
+          </div>
+
+          <form onSubmit={handleCapacitySubmit} className="space-y-4 mt-6">
+            <div className="form-group">
+              <label className="sf-label">{t('carrier_ui.capacity_trucks_label', lang)}</label>
+              <input
+                type="number"
+                value={capacity.readyTrucks}
+                onChange={e => setCapacity({ ...capacity, readyTrucks: parseInt(e.target.value) })}
+                className="sf-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="sf-label">{t('carrier_ui.capacity_type_label', lang)}</label>
+              <select
+                value={capacity.truckType}
+                onChange={e => setCapacity({ ...capacity, truckType: e.target.value })}
+                className="sf-select"
+              >
+                <option value="Xe tải 1,5 tấn">Xe tải 1,5 tấn</option>
+                <option value="Xe tải 3,5 tấn">Xe tải 3,5 tấn</option>
+                <option value="Xe tải 5 tấn">Xe tải 5 tấn</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label className="sf-label">{t('carrier_ui.capacity_load_label', lang)}</label>
+              <input
+                type="text"
+                value={capacity.maxLoad}
+                onChange={e => setCapacity({ ...capacity, maxLoad: e.target.value })}
+                className="sf-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="sf-label">{t('carrier_ui.capacity_region_label', lang)}</label>
+              <input
+                type="text"
+                value={capacity.activeRegion}
+                onChange={e => setCapacity({ ...capacity, activeRegion: e.target.value })}
+                className="sf-input"
+              />
+            </div>
+
+            <button type="submit" className="sf-btn sf-btn-primary w-full mt-4">
+              {t('carrier_ui.capacity_save_btn', lang)}
+            </button>
+          </form>
+        </section>
+      )}
+
       {/* ── Tab: Trips ── */}
       {activeTab === 'trips' && (
         <div className="space-y-6">
           <div className="section-header">
-            <h2>Chuyến hàng đang tìm đối tác vận chuyển</h2>
+            <h2>{t('sec.trips', lang)}</h2>
           </div>
 
           {/* Filter */}
@@ -304,52 +362,52 @@ export default function CarrierDashboard() {
             </div>
 
             <button onClick={() => setSuccessMsg('Đã cập nhật bộ lọc chuyến hàng!')} className="sf-btn sf-btn-primary w-full">
-              Lọc chuyến hàng
+              {t('action.filter', lang)}
             </button>
           </div>
 
           {/* Grid list of trips */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {getFilteredTrips().map((t) => (
-              <article key={t.id} className="sf-card flex flex-col justify-between">
+            {getFilteredTrips().map((tItem) => (
+              <article key={tItem.id} className="sf-card flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <span className="font-mono text-xs font-bold text-[var(--ink-muted)]">{t.id}</span>
-                    <span className={`badge ${t.status === 'Đang nhận báo giá' ? 'badge-warning' : 'badge-success'}`}>
-                      {t.status}
+                    <span className="font-mono text-xs font-bold text-[var(--ink-muted)]">{tItem.id}</span>
+                    <span className={`badge ${tItem.status === 'Đang nhận báo giá' ? 'badge-warning' : 'badge-success'}`}>
+                      {tItem.status}
                     </span>
                   </div>
-                  <h3 className="text-base font-bold mb-2">{t.goods}</h3>
+                  <h3 className="text-base font-bold mb-2">{tItem.goods}</h3>
                   <div className="text-xs text-[var(--ink-secondary)] space-y-1 mb-4">
-                    <p className="m-0">📍 <strong>Lấy:</strong> {t.pickup}</p>
-                    <p className="m-0">🚩 <strong>Giao:</strong> {t.drop}</p>
-                    <p className="m-0">⚖️ <strong>Khối lượng:</strong> {t.weight} / Thể tích: {t.volume}</p>
-                    <p className="m-0">🚛 <strong>Xe yêu cầu:</strong> {t.truck}</p>
-                    <p className="m-0">📅 <strong>Ngày cần lấy:</strong> {t.date}</p>
+                    <p className="m-0">📍 <strong>Lấy:</strong> {tItem.pickup}</p>
+                    <p className="m-0">🚩 <strong>Giao:</strong> {tItem.drop}</p>
+                    <p className="m-0">⚖️ <strong>Khối lượng:</strong> {tItem.weight} / Thể tích: {tItem.volume}</p>
+                    <p className="m-0">🚛 <strong>Xe yêu cầu:</strong> {tItem.truck}</p>
+                    <p className="m-0">📅 <strong>Ngày cần lấy:</strong> {tItem.date}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3.5 pt-3 border-t border-[var(--border)]">
-                  <button onClick={() => setSelectedTripDetails(t)} className="sf-btn sf-btn-secondary flex-1 text-xs">
-                    Chi tiết
+                  <button onClick={() => setSelectedTripDetails(tItem)} className="sf-btn sf-btn-secondary flex-1 text-xs">
+                    {t('action.details', lang)}
                   </button>
                   <button
-                    disabled={t.status !== 'Đang nhận báo giá'}
+                    disabled={tItem.status !== 'Đang nhận báo giá'}
                     onClick={() => {
-                      setSelectedTripForQuote(t)
+                      setSelectedTripForQuote(tItem)
                       setQuoteForm({
                         transportFee: 350000,
                         loadingFee: 50000,
                         countFee: 20000,
                         durationText: '4 giờ',
-                        pickupDate: t.date,
+                        pickupDate: tItem.date,
                         notes: '',
                         isCommitted: false,
                       })
                     }}
                     className="sf-btn sf-btn-primary flex-1 text-xs"
                   >
-                    Báo giá cước
+                    {t('action.quote', lang)}
                   </button>
                 </div>
               </article>
@@ -363,13 +421,13 @@ export default function CarrierDashboard() {
         <div className="modal flex">
           <div className="modal-content">
             <div className="modal-header">
-              <h3>Cập nhật Năng lực vận chuyển</h3>
+              <h3>{t('carrier_ui.capacity_modal_title', lang)}</h3>
               <button onClick={() => setShowCapacityModal(false)} className="close-btn">&times;</button>
             </div>
 
             <form onSubmit={handleCapacitySubmit} className="space-y-4">
               <div className="form-group">
-                <label className="sf-label">Số xe đang sẵn sàng hoạt động</label>
+                <label className="sf-label">{t('carrier_ui.capacity_trucks_label', lang)}</label>
                 <input
                   type="number"
                   value={capacity.readyTrucks}
@@ -379,7 +437,7 @@ export default function CarrierDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="sf-label">Loại xe chủ lực</label>
+                <label className="sf-label">{t('carrier_ui.capacity_type_label', lang)}</label>
                 <select
                   value={capacity.truckType}
                   onChange={e => setCapacity({ ...capacity, truckType: e.target.value })}
@@ -392,7 +450,7 @@ export default function CarrierDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="sf-label">Tải trọng tối đa</label>
+                <label className="sf-label">{t('carrier_ui.capacity_load_label', lang)}</label>
                 <input
                   type="text"
                   value={capacity.maxLoad}
@@ -402,7 +460,7 @@ export default function CarrierDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="sf-label">Tuyến đường hoạt động</label>
+                <label className="sf-label">{t('carrier_ui.capacity_region_label', lang)}</label>
                 <input
                   type="text"
                   value={capacity.activeRegion}
@@ -411,9 +469,14 @@ export default function CarrierDashboard() {
                 />
               </div>
 
-              <button type="submit" className="sf-btn sf-btn-primary w-full mt-4">
-                Lưu năng lực vận chuyển
-              </button>
+              <div className="flex items-center gap-3 mt-4">
+                <button type="button" onClick={() => setShowCapacityModal(false)} className="sf-btn sf-btn-ghost flex-1">
+                  {t('action.cancel', lang)}
+                </button>
+                <button type="submit" className="sf-btn sf-btn-primary flex-1">
+                  {t('carrier_ui.capacity_save_btn', lang)}
+                </button>
+              </div>
             </form>
           </div>
         </div>

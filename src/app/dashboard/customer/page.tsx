@@ -269,10 +269,10 @@ export default function CustomerDashboard() {
 
           <div className="flex gap-4">
             <button onClick={() => { window.location.hash = '#marketplace' }} className="sf-btn sf-btn-primary">
-              🛒 Khám phá Chợ sỉ B2B
+              {t('cust_quick.explore_mp', lang)}
             </button>
             <button onClick={() => { window.location.hash = '#requests' }} className="sf-btn sf-btn-secondary">
-              📦 Theo dõi Đơn hàng của tôi
+              {t('cust_quick.track_orders', lang)}
             </button>
           </div>
         </div>
@@ -376,19 +376,19 @@ export default function CustomerDashboard() {
       {activeTab === 'requests' && (
         <section className="sf-card">
           <div className="section-header">
-            <h2>Yêu cầu & Đơn hàng của tôi</h2>
+            <h2>{t('cust_orders.title', lang)}</h2>
           </div>
 
           <div className="overflow-x-auto mt-4">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Sản phẩm</th>
-                  <th>Số lượng</th>
-                  <th>Giá đề xuất</th>
-                  <th>Trạng thái</th>
-                  <th>Chi tiết Logistics</th>
-                  <th>Hành động</th>
+                  <th>{t('th.product_name', lang)}</th>
+                  <th>{t('th.quantity', lang)}</th>
+                  <th>{t('th.proposed_price', lang)}</th>
+                  <th>{t('th.status', lang)}</th>
+                  <th>{t('cust_orders.logistics_detail', lang)}</th>
+                  <th>{t('th.actions', lang)}</th>
                 </tr>
               </thead>
               <tbody>
@@ -407,25 +407,25 @@ export default function CustomerDashboard() {
                           req.status === 'awaiting_payment' ? 'badge-info' :
                           'badge-success'
                         }`}>
-                          {req.status === 'submitted' ? 'Chờ kiểm duyệt' : 
-                           req.status === 'quoted' ? 'Đã báo giá cước' : 
-                           req.status === 'buyer_confirmed' ? 'Chờ thanh toán' :
-                           req.status === 'awaiting_payment' ? 'Chờ xác nhận thanh toán' :
-                           'Hoàn thành'}
+                          {req.status === 'submitted' ? t('status.pending_review', lang) : 
+                           req.status === 'quoted' ? t('status.quoted', lang) : 
+                           req.status === 'buyer_confirmed' ? t('status.awaiting_payment', lang) :
+                           req.status === 'awaiting_payment' ? t('status.awaiting_payment', lang) :
+                           t('status.delivered', lang)}
                         </span>
                       </td>
                       <td>
                         {totalLogistics > 0 ? (
                           <div className="text-xs space-y-1">
-                            <p className="m-0 text-[var(--primary)] font-bold">Tổng cước: {totalLogistics.toLocaleString()} VND</p>
-                            <p className="m-0 text-[var(--ink-muted)]">🚚 Phí vận chuyển: {req.shipping_fee?.toLocaleString()} VND</p>
-                            <p className="m-0 text-[var(--ink-muted)]">📦 Bốc xếp: {req.loading_fee?.toLocaleString()} VND</p>
-                            <p className="m-0 text-[var(--ink-muted)]">🔢 Kiểm đếm: {req.count_fee?.toLocaleString()} VND</p>
-                            <p className="m-0 text-[var(--ink-muted)]">⏱️ Thời gian: {req.duration_text} (Hãng: {req.carrier})</p>
-                            <p className="m-0 text-[var(--ink-muted)]">📅 Ngày lấy: {req.pickup_date}</p>
+                            <p className="m-0 text-[var(--primary)] font-bold">{t('cust_orders.total_logistics', lang)} {totalLogistics.toLocaleString()} VND</p>
+                            <p className="m-0 text-[var(--ink-muted)]">{t('cust_orders.shipping_fee', lang)} {req.shipping_fee?.toLocaleString()} VND</p>
+                            <p className="m-0 text-[var(--ink-muted)]">{t('cust_orders.loading_fee', lang)} {req.loading_fee?.toLocaleString()} VND</p>
+                            <p className="m-0 text-[var(--ink-muted)]">{t('cust_orders.count_fee', lang)} {req.count_fee?.toLocaleString()} VND</p>
+                            <p className="m-0 text-[var(--ink-muted)]">{t('cust_orders.duration', lang)} {req.duration_text} (Hãng: {req.carrier})</p>
+                            <p className="m-0 text-[var(--ink-muted)]">{t('cust_orders.pickup_date', lang)} {req.pickup_date}</p>
                           </div>
                         ) : (
-                          <span className="text-xs text-[var(--ink-muted)]">Đang chờ tính cước</span>
+                          <span className="text-xs text-[var(--ink-muted)]">{t('cust_orders.awaiting_quote', lang)}</span>
                         )}
                       </td>
                       <td>
@@ -434,7 +434,7 @@ export default function CustomerDashboard() {
                             onClick={() => handleApproveQuote(req.id)}
                             className="sf-btn sf-btn-primary py-1.5 px-3 text-xs"
                           >
-                            Xác nhận báo giá & Chốt đơn
+                            {t('cust_orders.confirm_quote_btn', lang)}
                           </button>
                         )}
                         {req.status === 'buyer_confirmed' && (
@@ -442,11 +442,11 @@ export default function CustomerDashboard() {
                             onClick={() => setPaymentRequest(req)}
                             className="sf-btn sf-btn-accent py-1.5 px-3 text-xs"
                           >
-                            Thanh toán chuyển khoản
+                            {t('action.pay', lang)}
                           </button>
                         )}
                         {req.status === 'awaiting_payment' && (
-                          <span className="text-xs text-[var(--ink-muted)] block mb-1">Chờ duyệt thanh toán</span>
+                          <span className="text-xs text-[var(--ink-muted)] block mb-1">{t('status.awaiting_payment', lang)}</span>
                         )}
                         {(req.status === 'converted_to_order' || req.status === 'completed' || req.status === 'buyer_confirmed' || req.status === 'awaiting_payment') && (
                           <button
@@ -485,14 +485,14 @@ export default function CustomerDashboard() {
       {activeTab === 'warehouses' && (
         <section className="sf-card">
           <div className="section-header">
-            <h2>Kho hàng tiếp nhận</h2>
+            <h2>{t('sec.buyer_warehouses', lang)}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
             {warehouses.map((wh) => (
               <div key={wh.id} className="p-5 border border-[var(--border)] rounded-lg bg-[var(--surface)]">
                 <h3 className="text-base font-bold mb-2">{wh.name}</h3>
-                <p className="text-sm text-[var(--ink-secondary)] mb-1">📍 Địa chỉ: {wh.address}, {wh.city}</p>
+                <p className="text-sm text-[var(--ink-secondary)] mb-1">📍 {t('th.address', lang)}: {wh.address}, {wh.city}</p>
               </div>
             ))}
           </div>

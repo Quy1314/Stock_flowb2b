@@ -273,10 +273,10 @@ export default function HostDashboard() {
 
           <div className="flex gap-4">
             <button onClick={() => { window.location.hash = '#moderation' }} className="sf-btn sf-btn-primary">
-              🔎 Đi tới Hàng chờ Kiểm duyệt
+              {t('host_ui.goto_moderation', lang)}
             </button>
             <button onClick={() => { window.location.hash = '#logistics' }} className="sf-btn sf-btn-secondary">
-              🚚 Đi tới Logistics Center
+              {t('host_ui.goto_logistics', lang)}
             </button>
           </div>
         </div>
@@ -286,7 +286,7 @@ export default function HostDashboard() {
       {activeTab === 'moderation' && (
         <section className="sf-card">
           <div className="section-header">
-            <h2>Hàng chờ kiểm duyệt sản phẩm thanh lý</h2>
+            <h2>{t('sec.moderation', lang)}</h2>
           </div>
 
           {pendingListings.length === 0 ? (
@@ -296,12 +296,12 @@ export default function HostDashboard() {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Sản phẩm</th>
-                    <th>Nhà cung cấp</th>
-                    <th>Số lượng</th>
-                    <th>Đơn giá</th>
-                    <th>Số lô</th>
-                    <th>Hành động</th>
+                    <th>{t('th.product_name', lang)}</th>
+                    <th>{t('th.seller', lang)}</th>
+                    <th>{t('th.quantity', lang)}</th>
+                    <th>{t('th.unit_price', lang)}</th>
+                    <th>{t('th.lot_number', lang)}</th>
+                    <th>{t('th.actions', lang)}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -315,10 +315,10 @@ export default function HostDashboard() {
                       <td>
                         <div className="flex items-center gap-3.5 flex-wrap">
                           <button onClick={() => setDetailedListing(lst)} className="sf-btn sf-btn-secondary py-1.5 px-3 text-xs">
-                            Chi tiết & Hồ sơ
+                            {t('action.details', lang)}
                           </button>
                           <button onClick={() => handleReviewListing(lst.id, true)} className="sf-btn sf-btn-primary py-1.5 px-3 text-xs">
-                            Duyệt
+                            {t('action.agree', lang)}
                           </button>
                         </div>
                       </td>
@@ -336,19 +336,19 @@ export default function HostDashboard() {
         <div className="space-y-6">
           <section className="sf-card">
             <div className="section-header">
-              <h2>Quản lý các yêu cầu đặt mua sỉ</h2>
+              <h2>{t('sec.logistics', lang)}</h2>
             </div>
 
             <div className="overflow-x-auto mt-4">
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Sản phẩm</th>
-                    <th>Khách hàng</th>
-                    <th>Số lượng</th>
-                    <th>Điều phối viên</th>
-                    <th>Trạng thái</th>
-                    <th>Hành động</th>
+                    <th>{t('th.product_name', lang)}</th>
+                    <th>{t('th.customer', lang)}</th>
+                    <th>{t('th.quantity', lang)}</th>
+                    <th>{t('role.host', lang)}</th>
+                    <th>{t('th.status', lang)}</th>
+                    <th>{t('th.actions', lang)}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -364,8 +364,8 @@ export default function HostDashboard() {
                           req.status === 'seller_confirmed' ? 'badge-info' : 
                           'badge-success'
                         }`}>
-                          {req.status === 'submitted' ? 'Chờ nhận' : 
-                           req.status === 'seller_confirmed' ? 'Seller đã đồng ý' : 'Đã chốt giá'}
+                          {req.status === 'submitted' ? t('status.pending_review', lang) : 
+                           req.status === 'seller_confirmed' ? t('status.seller_confirmed', lang) : t('status.quoted', lang)}
                         </span>
                       </td>
                       <td>
@@ -382,7 +382,7 @@ export default function HostDashboard() {
                               }}
                               className="sf-btn sf-btn-primary py-1.5 px-3 text-xs"
                             >
-                              Nhập cước Logistics
+                              {t('action.quote', lang)}
                             </button>
                           )}
                           {req.status === 'quoted' && (
@@ -408,7 +408,7 @@ export default function HostDashboard() {
       {activeTab === 'orders' && (
         <section className="sf-card">
           <div className="section-header">
-            <h2>Hồ sơ Đơn hàng (Orders)</h2>
+            <h2>{t('sec.orders', lang)}</h2>
           </div>
 
           <div className="overflow-x-auto mt-4">
@@ -416,11 +416,11 @@ export default function HostDashboard() {
               <thead>
                 <tr>
                   <th>Mã đơn mua</th>
-                  <th>Khách hàng</th>
-                  <th>Sản phẩm</th>
+                  <th>{t('th.customer', lang)}</th>
+                  <th>{t('th.product_name', lang)}</th>
                   <th>Tổng giá trị</th>
-                  <th>Trạng thái thanh toán</th>
-                  <th>Hành động</th>
+                  <th>{t('th.status', lang)}</th>
+                  <th>{t('th.actions', lang)}</th>
                 </tr>
               </thead>
               <tbody>
@@ -435,8 +435,8 @@ export default function HostDashboard() {
                         ord.status === 'awaiting_payment' ? 'badge-warning' : 
                         ord.status === 'paid' ? 'badge-success' : 'badge-info'
                       }`}>
-                        {ord.status === 'awaiting_payment' ? 'Chờ thanh toán chuyển khoản' : 
-                         ord.status === 'paid' ? 'Đã thanh toán (Verified)' : ord.status}
+                        {ord.status === 'awaiting_payment' ? t('status.awaiting_payment', lang) : 
+                         ord.status === 'paid' ? t('status.paid', lang) : ord.status}
                       </span>
                     </td>
                     <td>
@@ -476,7 +476,7 @@ export default function HostDashboard() {
       {activeTab === 'shipments' && (
         <section className="sf-card">
           <div className="section-header">
-            <h2>Theo dõi & Điều phối Vận đơn</h2>
+            <h2>{t('sec.shipments', lang)}</h2>
           </div>
 
           <div className="overflow-x-auto mt-4">
@@ -484,10 +484,10 @@ export default function HostDashboard() {
               <thead>
                 <tr>
                   <th>Vận đơn cho đơn hàng</th>
-                  <th>Khách hàng</th>
-                  <th>Đơn vị vận chuyển</th>
-                  <th>Trạng thái hành trình</th>
-                  <th>Cập nhật</th>
+                  <th>{t('th.customer', lang)}</th>
+                  <th>{t('role.carrier', lang)}</th>
+                  <th>{t('th.status', lang)}</th>
+                  <th>{t('th.actions', lang)}</th>
                 </tr>
               </thead>
               <tbody>
@@ -502,8 +502,8 @@ export default function HostDashboard() {
                         shp.status === 'in_transit' ? 'badge-info' : 
                         'badge-success'
                       }`}>
-                        {shp.status === 'scheduled' ? 'Đã lên lịch lấy hàng' : 
-                         shp.status === 'in_transit' ? 'Đang vận chuyển' : 'Đã giao hàng'}
+                        {shp.status === 'scheduled' ? t('status.pending_review', lang) : 
+                         shp.status === 'in_transit' ? t('status.in_transit', lang) : t('status.delivered', lang)}
                       </span>
                     </td>
                     <td>
@@ -564,13 +564,13 @@ export default function HostDashboard() {
                   onClick={() => handleReviewListing(detailedListing.id, true)}
                   className="sf-btn sf-btn-primary flex-1"
                 >
-                  Phê duyệt (Duyệt tin)
+                  {t('action.agree', lang)}
                 </button>
                 <button
                   onClick={() => handleReviewListing(detailedListing.id, false)}
                   className="sf-btn sf-btn-ghost text-rose-600 flex-1"
                 >
-                  Từ chối duyệt
+                  {t('action.reject', lang)}
                 </button>
               </div>
             </div>
@@ -583,13 +583,13 @@ export default function HostDashboard() {
         <div className="modal flex">
           <div className="modal-content animate-scale-in">
             <div className="modal-header">
-              <h3>Nhập cước phí Logistics đề xuất</h3>
+              <h3>{t('host_ui.quote_modal_title', lang)}</h3>
               <button onClick={() => setSelectedRequestForQuote(null)} className="close-btn">&times;</button>
             </div>
 
             <form onSubmit={handleLogisticsQuoteSubmit} className="space-y-4">
               <div className="form-group">
-                <label className="sf-label">Cước phí vận chuyển chính (VNĐ) (*)</label>
+                <label className="sf-label">{t('host_ui.quote_shipping_fee', lang)} (*)</label>
                 <input
                   type="number"
                   required
@@ -600,7 +600,7 @@ export default function HostDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="sf-label">Phí bốc xếp đề xuất (VNĐ)</label>
+                <label className="sf-label">{t('host_ui.quote_loading_fee', lang)}</label>
                 <input
                   type="number"
                   value={loadingFee}
@@ -610,7 +610,7 @@ export default function HostDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="sf-label">Phí kiểm đếm đề xuất (VNĐ)</label>
+                <label className="sf-label">{t('host_ui.quote_count_fee', lang)}</label>
                 <input
                   type="number"
                   value={countFee}
@@ -620,7 +620,7 @@ export default function HostDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="sf-label">Thời gian dự kiến</label>
+                <label className="sf-label">{t('host_ui.quote_duration', lang)}</label>
                 <input
                   type="text"
                   value={durationText}
@@ -630,7 +630,7 @@ export default function HostDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="sf-label">Đối tác vận tải điều động</label>
+                <label className="sf-label">{t('host_ui.quote_carrier', lang)}</label>
                 <select className="sf-select">
                   <option value="Vận tải Minh Phát">Vận tải Minh Phát</option>
                   <option value="FastShip Co.">FastShip Co.</option>
@@ -644,10 +644,10 @@ export default function HostDashboard() {
                   onClick={() => setSelectedRequestForQuote(null)}
                   className="sf-btn sf-btn-ghost flex-1"
                 >
-                  Hủy
+                  {t('action.cancel', lang)}
                 </button>
                 <button type="submit" className="sf-btn sf-btn-primary flex-1">
-                  Xác nhận cước & Gửi báo giá
+                  {t('host_ui.quote_submit_btn', lang)}
                 </button>
               </div>
             </form>

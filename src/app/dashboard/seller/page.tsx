@@ -569,7 +569,7 @@ export default function SellerDashboard() {
         <div className="modal flex">
           <div className="modal-content !max-w-xl">
             <div className="modal-header">
-              <h3>Đăng lô hàng thanh lý mới</h3>
+              <h3>{t('list_modal.title', lang)}</h3>
               <button onClick={() => setShowListingModal(false)} className="close-btn">&times;</button>
             </div>
             
@@ -577,7 +577,7 @@ export default function SellerDashboard() {
               
               {/* Image upload gallery (Max 5) */}
               <div className="form-group">
-                <label className="sf-label">Ảnh thực tế lô hàng (Tối đa 5 ảnh)</label>
+                <label className="sf-label">{t('list_modal.images_label', lang)}</label>
                 <p className="text-xs text-[var(--ink-muted)] mb-2">Vui lòng tải ảnh thực tế sản phẩm, tem nhãn, bao bì và tình trạng thực tế của lô hàng.</p>
                 <input
                   type="file"
@@ -613,11 +613,11 @@ export default function SellerDashboard() {
 
               <div className="form-grid">
                 <div className="form-group">
-                  <label className="sf-label">Tên sản phẩm (*)</label>
+                  <label className="sf-label">{t('list_modal.product_name_label', lang)}</label>
                   <input
                     type="text"
                     required
-                    placeholder="Ví dụ: Lô túi nilon xuất khẩu dư"
+                    placeholder={t('list_modal.product_name_placeholder', lang)}
                     value={newListing.productName}
                     onChange={e => setNewListing({ ...newListing, productName: e.target.value })}
                     className="sf-input"
@@ -625,7 +625,7 @@ export default function SellerDashboard() {
                 </div>
 
                 <div className="form-group">
-                  <label className="sf-label">Danh mục (*)</label>
+                  <label className="sf-label">{t('list_modal.category_label', lang)}</label>
                   <select
                     value={newListing.categoryId}
                     onChange={e => setNewListing({ ...newListing, categoryId: parseInt(e.target.value) })}
@@ -652,7 +652,7 @@ export default function SellerDashboard() {
 
               <div className="form-grid">
                 <div className="form-group">
-                  <label className="sf-label">Kho hàng xuất phát (*)</label>
+                  <label className="sf-label">{t('list_modal.warehouse_label', lang)}</label>
                   <select className="sf-select">
                     {warehouses.map(wh => (
                       <option key={wh.id} value={wh.id}>{wh.name} ({wh.city})</option>
@@ -661,7 +661,7 @@ export default function SellerDashboard() {
                 </div>
 
                 <div className="form-group">
-                  <label className="sf-label">Tình trạng hàng</label>
+                  <label className="sf-label">{t('list_modal.condition_label', lang)}</label>
                   <input
                     type="text"
                     placeholder="Mới 100%, dư sản xuất, lưu kho 3 tháng"
@@ -674,7 +674,7 @@ export default function SellerDashboard() {
 
               <div className="form-grid">
                 <div className="form-group">
-                  <label className="sf-label">Số lượng muốn bán (*)</label>
+                  <label className="sf-label">{t('list_modal.quantity_label', lang)}</label>
                   <input
                     type="number"
                     required
@@ -685,7 +685,7 @@ export default function SellerDashboard() {
                 </div>
 
                 <div className="form-group">
-                  <label className="sf-label">Đơn vị tính (*)</label>
+                  <label className="sf-label">{t('list_modal.unit_label', lang)}</label>
                   <input
                     type="text"
                     required
@@ -699,7 +699,7 @@ export default function SellerDashboard() {
 
               <div className="form-grid">
                 <div className="form-group">
-                  <label className="sf-label">Giá bán đề xuất (VNĐ)</label>
+                  <label className="sf-label">{t('list_modal.unit_price_label', lang)}</label>
                   <input
                     type="number"
                     value={newListing.unitPrice || ''}
@@ -710,7 +710,7 @@ export default function SellerDashboard() {
                 </div>
 
                 <div className="form-group">
-                  <label className="sf-label">Số lô {Number(newListing.categoryId) === 3 && '(*)'}</label>
+                  <label className="sf-label">{t('list_modal.lot_number_label', lang)} {Number(newListing.categoryId) === 3 && '(*)'}</label>
                   <input
                     type="text"
                     required={Number(newListing.categoryId) === 3}
@@ -724,7 +724,7 @@ export default function SellerDashboard() {
 
               <div className="form-grid">
                 <div className="form-group">
-                  <label className="sf-label">Ngày sản xuất {Number(newListing.categoryId) === 3 && '(*)'}</label>
+                  <label className="sf-label">{t('list_modal.mfg_date_label', lang)} {Number(newListing.categoryId) === 3 && '(*)'}</label>
                   <input
                     type="date"
                     required={Number(newListing.categoryId) === 3}
@@ -735,7 +735,7 @@ export default function SellerDashboard() {
                 </div>
 
                 <div className="form-group">
-                  <label className="sf-label">Hạn sử dụng {Number(newListing.categoryId) === 3 && '(*)'}</label>
+                  <label className="sf-label">{t('list_modal.exp_date_label', lang)} {Number(newListing.categoryId) === 3 && '(*)'}</label>
                   <input
                     type="date"
                     required={Number(newListing.categoryId) === 3}
