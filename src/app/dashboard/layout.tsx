@@ -1,8 +1,43 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+
+/** Tab definitions per role */
+const ROLE_TABS: Record<string, { id: string; label: string; icon: string }[]> = {
+  seller: [
+    { id: 'overview', label: 'Tổng quan', icon: '📊' },
+    { id: 'listings', label: 'Sản phẩm của tôi', icon: '📦' },
+    { id: 'requests', label: 'Đơn mua từ khách', icon: '📥' },
+    { id: 'warehouses', label: 'Cài đặt Kho', icon: '⚙️' },
+  ],
+  customer: [
+    { id: 'overview', label: 'Tổng quan', icon: '📊' },
+    { id: 'marketplace', label: 'Chợ sỉ B2B', icon: '🛒' },
+    { id: 'requests', label: 'Yêu cầu & Đơn hàng', icon: '📦' },
+    { id: 'warehouses', label: 'Quản lý Kho nhận', icon: '⚙️' },
+  ],
+  host: [
+    { id: 'overview', label: 'Tổng quan', icon: '📊' },
+    { id: 'moderation', label: 'Duyệt tin đăng', icon: '🔎' },
+    { id: 'logistics', label: 'Logistics Center', icon: '🚚' },
+    { id: 'orders', label: 'Đơn hàng (Orders)', icon: '🛒' },
+    { id: 'shipments', label: 'Vận đơn (Shipments)', icon: '📈' },
+  ],
+  carrier: [
+    { id: 'overview', label: 'Tổng quan', icon: '📊' },
+    { id: 'trips', label: 'Yêu cầu Vận chuyển', icon: '🚚' },
+    { id: 'capacity', label: 'Cập nhật Năng lực', icon: '⚙️' },
+  ],
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  seller: 'Người bán (Seller)',
+  customer: 'Người mua (Customer)',
+  host: 'Điều phối viên (Host)',
+  carrier: 'Đơn vị vận tải (Carrier)',
+}
 
 export default function DashboardLayout({
   children,
@@ -14,16 +49,15 @@ export default function DashboardLayout({
   const [role, setRole] = useState<'seller' | 'customer' | 'host' | 'carrier' | null>(null)
   const [companyName, setCompanyName] = useState('Đang tải...')
   const [userName, setUserName] = useState('Đang tải...')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
-    // 1. Detect role from path
     const pathParts = pathname.split('/')
     const detectedRole = pathParts[2] as 'seller' | 'customer' | 'host' | 'carrier'
     if (['seller', 'customer', 'host', 'carrier'].includes(detectedRole)) {
       setRole(detectedRole)
     }
 
-    // 2. Mock profile values or read from local storage / cookie
     const isMock = document.cookie.includes('sb-mock-role')
     if (isMock) {
       if (detectedRole === 'seller') {
@@ -40,138 +74,99 @@ export default function DashboardLayout({
         setUserName('Nguyễn Vận Tải')
       }
     } else {
-      // In real mode, use default titles or fetch async
       setCompanyName('Doanh nghiệp thành viên')
       setUserName('Đại diện')
     }
   }, [pathname])
 
   const handleLogout = () => {
-    // Clear mock cookie
     document.cookie = 'sb-mock-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
-    
-    // Clear Supabase session if any (would normally call action, here we can redirect to login)
     router.push('/login')
   }
 
-  // Sidebar Menu items by role
-  const getMenuItems = () => {
-    if (role === 'seller') {
-      return [
-        { label: '📊 Tổng quan', href: '/dashboard/seller#overview' },
-        { label: '📦 Sản phẩm của tôi', href: '/dashboard/seller#listings' },
-        { label: '📥 Đơn mua từ khách', href: '/dashboard/seller#requests' },
-        { label: '⚙️ Cài đặt Kho', href: '/dashboard/seller#warehouses' },
-      ]
-    }
-    if (role === 'customer') {
-      return [
-        { label: '📊 Tổng quan', href: '/dashboard/customer#overview' },
-        { label: '🛒 Chợ sỉ B2B', href: '/dashboard/customer#marketplace' },
-        { label: '📦 Yêu cầu & Đơn hàng', href: '/dashboard/customer#requests' },
-        { label: '⚙️ Quản lý Kho nhận', href: '/dashboard/customer#warehouses' },
-      ]
-    }
-    if (role === 'host') {
-      return [
-        { label: '📊 Tổng quan', href: '/dashboard/host#overview' },
-        { label: '🔎 Duyệt tin đăng', href: '/dashboard/host#moderation' },
-        { label: '🚚 Logistics Center', href: '/dashboard/host#logistics' },
-        { label: '🛒 Đơn hàng (Orders)', href: '/dashboard/host#orders' },
-        { label: '📈 Vận đơn (Shipments)', href: '/dashboard/host#shipments' },
-      ]
-    }
-    if (role === 'carrier') {
-      return [
-        { label: '📊 Tổng quan', href: '/dashboard/carrier#overview' },
-        { label: '🚚 Yêu cầu Vận chuyển', href: '/dashboard/carrier#trips' },
-        { label: '⚙️ Cập nhật Năng lực', href: '/dashboard/carrier#capacity' },
-      ]
-    }
-    return []
-  }
+  /** Navigate sidebar: update hash + dispatch hashchange so child pages pick it up */
+  const handleTabClick = useCallback((tabId: string) => {
+    // Update the URL hash
+    window.location.hash = tabId
+    // Manually dispatch hashchange so child pages (seller, customer, etc.) can react
+    window.dispatchEvent(new HashChangeEvent('hashchange'))
+    // Close mobile sidebar
+    setSidebarOpen(false)
+  }, [])
 
-  const roleLabels = {
-    seller: 'Người bán (Seller)',
-    customer: 'Người mua (Customer)',
-    host: 'Điều phối viên (Host)',
-    carrier: 'Đơn vị vận tải (Carrier)',
-  }
+  const tabs = role ? (ROLE_TABS[role] || []) : []
+  const currentHash = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : 'overview'
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[var(--bg)] text-[var(--ink)]">
+    <div className="sf-dashboard-shell">
+      {/* ── Mobile hamburger overlay ── */}
+      {sidebarOpen && (
+        <div
+          className="sf-sidebar-overlay"
+          onClick={() => setSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* ── Sidebar ── */}
-      <aside
-        className="w-full md:w-64 flex-shrink-0 flex flex-col p-6 border-b md:border-b-0 md:border-r border-[var(--border)] animate-fade-in"
-        style={{ background: 'var(--surface-sunken)' }}
-      >
-        <div className="mb-8 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-xl font-bold no-underline text-[var(--ink)]">
-            <span
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-extrabold"
-              style={{
-                background: 'var(--primary)',
-                color: 'var(--ink-on-primary)',
-              }}
-            >
-              SF
-            </span>
+      <aside className={`sf-sidebar ${sidebarOpen ? 'sf-sidebar--open' : ''}`}>
+        <div className="sf-sidebar__header">
+          <Link href="/" className="sf-sidebar__brand">
+            <span className="sf-sidebar__logo">SF</span>
             StockFlow
           </Link>
-          <span className="md:hidden text-xs px-2.5 py-1 rounded bg-[var(--primary-subtle)] text-[var(--primary-dark)] font-semibold">
-            {role ? role.toUpperCase() : ''}
-          </span>
+          {/* Mobile close */}
+          <button
+            className="sf-sidebar__close md:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Đóng menu"
+          >
+            ✕
+          </button>
         </div>
 
-        <nav className="flex flex-col gap-2 flex-grow">
-          {getMenuItems().map((item, idx) => {
-            const isActive = pathname === item.href.split('#')[0]
+        <nav className="sf-sidebar__nav">
+          {tabs.map((tab) => {
+            const isActive = currentHash === tab.id || (!currentHash && tab.id === 'overview')
             return (
-              <Link
-                key={idx}
-                href={item.href}
-                className="flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all hover:bg-[var(--primary-subtle)] hover:text-[var(--primary-dark)] text-[var(--ink-secondary)]"
-                style={{
-                  background: isActive ? 'var(--primary-subtle)' : 'transparent',
-                  color: isActive ? 'var(--primary-dark)' : undefined,
-                  fontWeight: isActive ? '600' : undefined,
-                }}
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => handleTabClick(tab.id)}
+                className={`sf-sidebar__item ${isActive ? 'sf-sidebar__item--active' : ''}`}
               >
-                {item.label}
-              </Link>
+                <span className="sf-sidebar__item-icon">{tab.icon}</span>
+                {tab.label}
+              </button>
             )
           })}
         </nav>
       </aside>
 
       {/* ── Main Content Area ── */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="sf-main-area">
         {/* Top Header */}
-        <header
-          className="h-16 border-b border-[var(--border)] px-6 md:px-8 flex items-center justify-between"
-          style={{ background: 'var(--surface)' }}
-        >
-          <div className="flex items-center gap-3">
-            <div
-              className="h-10 w-10 rounded-full flex items-center justify-center font-bold text-sm"
-              style={{
-                background: 'var(--primary)',
-                color: 'var(--ink-on-primary)',
-              }}
-            >
+        <header className="sf-topbar">
+          {/* Mobile hamburger */}
+          <button
+            className="sf-topbar__hamburger md:hidden"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Mở menu"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+
+          <div className="sf-topbar__profile">
+            <div className="sf-topbar__avatar">
               {userName.substring(0, 2).toUpperCase()}
             </div>
             <div>
-              <h4 className="text-sm font-bold m-0" style={{ color: 'var(--ink)' }}>
-                {companyName}
-              </h4>
-              <span className="text-xs text-[var(--ink-muted)] block">
-                {role ? roleLabels[role] : ''}
-              </span>
+              <h4 className="sf-topbar__company">{companyName}</h4>
+              <span className="sf-topbar__role">{role ? ROLE_LABELS[role] : ''}</span>
             </div>
           </div>
 
-          <button onClick={handleLogout} className="sf-btn sf-btn-ghost text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20">
+          <button onClick={handleLogout} className="sf-topbar__logout">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="18"
@@ -193,7 +188,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Dynamic Page Container */}
-        <main className="flex-1 p-6 md:p-8 overflow-y-auto animate-fade-in">
+        <main className="sf-page-content">
           {children}
         </main>
       </div>
