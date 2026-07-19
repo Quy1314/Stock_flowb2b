@@ -360,15 +360,17 @@ a:hover {
 }
 
 /* ── Badge ────────────────────────────────────────────────── */
-.sf-badge {
+.sf-badge,
+.badge {
   display: inline-flex;
   align-items: center;
-  padding: var(--space-1) var(--space-3);
+  padding: 0.35rem 0.75rem;
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   border-radius: var(--radius-full);
-  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 1.2;
 }
 
 .sf-badge-primary {
@@ -379,6 +381,74 @@ a:hover {
 .sf-badge-accent {
   background: var(--accent-light);
   color: var(--accent-dark);
+}
+
+.badge-warning {
+  background: oklch(0.94 0.08 75);
+  color: oklch(0.42 0.16 75);
+  border: 1px solid oklch(0.85 0.12 75);
+}
+
+.badge-info {
+  background: oklch(0.94 0.06 230);
+  color: oklch(0.40 0.14 230);
+  border: 1px solid oklch(0.85 0.10 230);
+}
+
+.badge-success {
+  background: oklch(0.94 0.08 150);
+  color: oklch(0.38 0.16 150);
+  border: 1px solid oklch(0.85 0.12 150);
+}
+
+.badge-danger {
+  background: oklch(0.94 0.08 25);
+  color: oklch(0.42 0.18 25);
+  border: 1px solid oklch(0.85 0.14 25);
+}
+
+/* ── Data Tables ───────────────────────────────────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+  text-align: left;
+  margin: 0;
+}
+
+.data-table th {
+  padding: 0.875rem 1.25rem;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-muted);
+  background: var(--surface-sunken);
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 1rem 1.25rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.data-table tr:hover td {
+  background-color: var(--primary-subtle);
+}
+
+/* Button gap inside table action cells & button wrappers */
+.data-table td .flex,
+.sf-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem !important; /* 14px clear gap between buttons */
+  flex-wrap: wrap;
 }
 
 /* ── Animation Keyframes ──────────────────────────────────── */

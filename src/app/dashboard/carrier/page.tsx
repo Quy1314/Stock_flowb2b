@@ -175,7 +175,7 @@ export default function CarrierDashboard() {
               <div className="space-y-4">
                 <div className="form-group">
                   <label className="sf-label">Cập nhật hành trình vận đơn</label>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-3">
                     <select
                       value={myTripStatus}
                       onChange={e => setMyTripStatus(e.target.value)}
@@ -289,7 +289,7 @@ export default function CarrierDashboard() {
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-3 border-t border-[var(--border)]">
+                <div className="flex items-center gap-3.5 pt-3 border-t border-[var(--border)]">
                   <button onClick={() => setSelectedTripDetails(t)} className="sf-btn sf-btn-secondary flex-1 text-xs">
                     Chi tiết
                   </button>

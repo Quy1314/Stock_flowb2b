@@ -484,7 +484,7 @@ export default function SellerDashboard() {
                     </td>
                     <td>
                       {req.status === 'submitted' && (
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-3.5 flex-wrap">
                           <button onClick={() => handleRespondRequest(req.id, true)} className="sf-btn sf-btn-primary py-1.5 px-3 text-xs">
                             Đồng ý
                           </button>

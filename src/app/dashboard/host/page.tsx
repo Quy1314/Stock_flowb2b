@@ -264,7 +264,7 @@ export default function HostDashboard() {
                       <td>{lst.unit_price.toLocaleString()} VND</td>
                       <td className="font-mono text-xs">{lst.lot_number || '—'}</td>
                       <td>
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-3.5 flex-wrap">
                           <button onClick={() => setDetailedListing(lst)} className="sf-btn sf-btn-secondary py-1.5 px-3 text-xs">
                             Chi tiết & Hồ sơ
                           </button>
@@ -320,7 +320,7 @@ export default function HostDashboard() {
                         </span>
                       </td>
                       <td>
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-3.5 flex-wrap">
                           {req.status === 'submitted' && (
                             <button onClick={() => handleAssignCoordinator(req.id)} className="sf-btn sf-btn-secondary py-1.5 px-3 text-xs">
                               Gán việc cho tôi
@@ -392,7 +392,7 @@ export default function HostDashboard() {
                     </td>
                     <td>
                       {ord.status === 'awaiting_payment' && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-3 flex-wrap">
                           <a 
                             href="#" 
                             onClick={(e) => {
@@ -405,7 +405,7 @@ export default function HostDashboard() {
                           </a>
                           <button
                             onClick={() => handleConfirmPayment(ord.id)}
-                            className="sf-btn sf-btn-primary py-1 px-2 text-xs font-bold"
+                            className="sf-btn sf-btn-primary py-1 px-3 text-xs font-bold"
                           >
                             Xác nhận đã nhận tiền
                           </button>
