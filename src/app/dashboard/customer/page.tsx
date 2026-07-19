@@ -282,19 +282,19 @@ export default function CustomerDashboard() {
       {activeTab === 'marketplace' && (
         <div className="space-y-6">
           <div className="section-header">
-            <h2>Chợ sỉ B2B — Sản phẩm thanh lý trực tiếp từ nhà máy</h2>
+            <h2>{t('sec.marketplace', lang)}</h2>
           </div>
 
           {/* Search and Filters */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-[var(--surface-sunken)] p-4 rounded-lg border border-[var(--border)]">
             <div className="form-group">
-              <label className="sf-label">Danh mục sản phẩm</label>
+              <label className="sf-label">{t('mp.filter_category', lang)}</label>
               <select
                 value={selectedCategory}
                 onChange={e => setSelectedCategory(e.target.value)}
                 className="sf-select"
               >
-                <option value="all">Tất cả danh mục</option>
+                <option value="all">{t('mp.all_categories', lang)}</option>
                 <option value="Bao bì">Bao bì và vật tư đóng gói</option>
                 <option value="Vải">Vải và phụ liệu may mặc</option>
                 <option value="Thực phẩm">Nông sản khô và thực phẩm đóng gói</option>
@@ -302,13 +302,13 @@ export default function CustomerDashboard() {
             </div>
 
             <div className="form-group">
-              <label className="sf-label">Khu vực lưu kho</label>
+              <label className="sf-label">{t('mp.filter_location', lang)}</label>
               <select
                 value={selectedLocation}
                 onChange={e => setSelectedLocation(e.target.value)}
                 className="sf-select"
               >
-                <option value="all">Tất cả khu vực</option>
+                <option value="all">{t('mp.all_locations', lang)}</option>
                 <option value="TP.HCM">TP.HCM</option>
                 <option value="Bình Dương">Bình Dương</option>
                 <option value="Đồng Nai">Đồng Nai</option>
@@ -316,10 +316,10 @@ export default function CustomerDashboard() {
             </div>
 
             <div className="form-group">
-              <label className="sf-label">Từ khóa sản phẩm</label>
+              <label className="sf-label">{t('mp.filter_keyword', lang)}</label>
               <input
                 type="text"
-                placeholder="Nhập tên sản phẩm..."
+                placeholder={t('mp.search_placeholder', lang)}
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                 className="sf-input"
@@ -335,19 +335,19 @@ export default function CustomerDashboard() {
                   <span className="sf-badge sf-badge-primary mb-3">{lst.category_name}</span>
                   <h3 className="text-base font-bold mb-2">{lst.product_name}</h3>
                   <div className="text-xs text-[var(--ink-secondary)] space-y-1 mb-4">
-                    <p className="m-0">🏢 Nhà cung cấp: <strong>{lst.seller_name}</strong></p>
-                    <p className="m-0">📍 Khu vực: {lst.location_text}</p>
-                    <p className="m-0">📦 Tình trạng: {lst.condition_text}</p>
-                    <p className="m-0">🔢 Số lô: <strong className="font-mono">{lst.lot_number || 'Chưa cung cấp'}</strong></p>
-                    {lst.manufacturing_date && <p className="m-0">📅 NSX: {lst.manufacturing_date}</p>}
-                    {lst.expiry_date && <p className="m-0">⏳ HSD: {lst.expiry_date}</p>}
-                    <p className="m-0">📥 Số lượng khả dụng: <strong>{lst.available_quantity.toLocaleString()} {lst.unit}</strong></p>
+                    <p className="m-0">🏢 {t('mp.supplier', lang)} <strong>{lst.seller_name}</strong></p>
+                    <p className="m-0">📍 {t('mp.location', lang)} {lst.location_text}</p>
+                    <p className="m-0">📦 {t('mp.condition', lang)} {lst.condition_text}</p>
+                    <p className="m-0">🔢 {t('mp.lot_number', lang)} <strong className="font-mono">{lst.lot_number || '—'}</strong></p>
+                    {lst.manufacturing_date && <p className="m-0">📅 {t('mp.mfg_date', lang)} {lst.manufacturing_date}</p>}
+                    {lst.expiry_date && <p className="m-0">⏳ {t('mp.exp_date', lang)} {lst.expiry_date}</p>}
+                    <p className="m-0">📥 {t('mp.avail_qty', lang)} <strong>{lst.available_quantity.toLocaleString()} {lst.unit}</strong></p>
                   </div>
                 </div>
 
                 <div className="space-y-3 pt-3 border-t border-[var(--border)]">
                   <div className="flex justify-between items-baseline">
-                    <span className="text-xs text-[var(--ink-muted)]">Giá bán</span>
+                    <span className="text-xs text-[var(--ink-muted)]">{t('mp.price_label', lang)}</span>
                     <span className="text-lg font-extrabold text-[var(--primary)]">
                       {lst.unit_price ? `${lst.unit_price.toLocaleString()} VND / ${lst.unit}` : 'Thương lượng'}
                     </span>
@@ -363,7 +363,7 @@ export default function CustomerDashboard() {
                     }}
                     className="sf-btn sf-btn-primary w-full"
                   >
-                    Gửi yêu cầu mua
+                    {t('mp.send_request_btn', lang)}
                   </button>
                 </div>
               </article>

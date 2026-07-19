@@ -86,10 +86,10 @@ export default function Home() {
               className="sf-btn sf-btn-ghost"
               style={{ fontSize: "0.875rem" }}
             >
-              {lang === 'ja' ? 'ログイン' : 'Đăng nhập'}
+              {t('landing.btn_login', lang)}
             </Link>
             <Link href="/register" className="sf-btn sf-btn-primary">
-              {lang === 'ja' ? '無料で始める' : 'Bắt đầu miễn phí'}
+              {t('landing.btn_cta', lang)}
             </Link>
           </div>
         </nav>
@@ -97,18 +97,13 @@ export default function Home() {
         <section className="sf-container pb-24 pt-20 text-center animate-fade-up">
           <div className="mx-auto max-w-3xl">
             <span className="sf-badge sf-badge-primary mb-6 inline-block animate-fade-down">
-              Nền tảng B2B #1 Việt Nam
+              {t('landing.hero_badge', lang)}
             </span>
             <h1
               className="mb-6"
               style={{ color: "var(--ink)" }}
             >
-              Kết nối{" "}
-              <span style={{ color: "var(--primary)" }}>Nhà Cung Cấp</span>{" "}
-              và{" "}
-              <span style={{ color: "var(--primary)" }}>Người Mua Sỉ</span>
-              <br />
-              trên một nền tảng duy nhất
+              {t('landing.hero_title', lang)}
             </h1>
             <p
               className="mx-auto mb-10 text-lg leading-relaxed delay-1 animate-fade-up"
@@ -117,9 +112,7 @@ export default function Home() {
                 color: "var(--ink-secondary)",
               }}
             >
-              StockFlow giúp doanh nghiệp quản lý kho hàng, đăng sản phẩm,
-              đặt hàng sỉ, và vận chuyển logistics — tất cả được kiểm duyệt
-              bởi đội ngũ điều phối chuyên nghiệp.
+              {t('landing.hero_sub', lang)}
             </p>
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row delay-2 animate-fade-up">
               <Link
@@ -141,13 +134,13 @@ export default function Home() {
                   <path d="M5 12h14" />
                   <path d="m12 5 7 7-7 7" />
                 </svg>
-                Đăng ký doanh nghiệp
+                {t('landing.btn_register', lang)}
               </Link>
               <Link
                 href="/login"
                 className="sf-btn sf-btn-secondary sf-btn-lg"
               >
-                Đăng nhập
+                {t('landing.btn_login', lang)}
               </Link>
             </div>
           </div>
@@ -164,13 +157,13 @@ export default function Home() {
           <div className="sf-container">
             <div className="mb-12 text-center">
               <h2 id="features-heading" style={{ color: "var(--ink)" }}>
-                Tại sao chọn StockFlow?
+                {t('landing.why_title', lang)}
               </h2>
               <p
                 className="mx-auto mt-4"
                 style={{ color: "var(--ink-secondary)" }}
               >
-                Một nền tảng — ba vai trò — toàn bộ chuỗi cung ứng B2B.
+                {t('landing.why_sub', lang)}
               </p>
             </div>
 
@@ -183,8 +176,8 @@ export default function Home() {
                       <circle cx="17" cy="17" r="3" /><circle cx="7" cy="7" r="3" />
                     </svg>
                   ),
-                  title: "Quản lý kho thông minh",
-                  desc: "Seller đăng kho hàng, quản lý sản phẩm, và theo dõi trạng thái kiểm duyệt — mọi thứ một chỗ.",
+                  title: t('landing.feature1_title', lang),
+                  desc: t('landing.feature1_desc', lang),
                 },
                 {
                   icon: (
@@ -193,8 +186,8 @@ export default function Home() {
                       <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
                     </svg>
                   ),
-                  title: "Đặt hàng sỉ dễ dàng",
-                  desc: "Buyer duyệt marketplace, gửi yêu cầu mua, xác nhận báo giá logistics, và theo dõi đơn hàng.",
+                  title: t('landing.feature2_title', lang),
+                  desc: t('landing.feature2_desc', lang),
                 },
                 {
                   icon: (
@@ -203,8 +196,8 @@ export default function Home() {
                       <path d="m9 12 2 2 4-4" />
                     </svg>
                   ),
-                  title: "Kiểm duyệt tin cậy",
-                  desc: "Host xác minh listing, kết nối Buyer–Seller, quản lý logistics và thanh toán an toàn.",
+                  title: t('landing.feature3_title', lang),
+                  desc: t('landing.feature3_desc', lang),
                 },
                 {
                   icon: (
@@ -213,8 +206,8 @@ export default function Home() {
                       <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
                     </svg>
                   ),
-                  title: "Logistics tích hợp",
-                  desc: "Báo giá vận chuyển, theo dõi giao hàng, cập nhật trạng thái real-time từ Host.",
+                  title: t('landing.feature4_title', lang),
+                  desc: t('landing.feature4_desc', lang),
                 },
               ].map((feature, i) => (
                 <article
@@ -259,13 +252,13 @@ export default function Home() {
           <div className="sf-container">
             <div className="mb-16 text-center">
               <h2 id="how-it-works-heading" style={{ color: "var(--ink)" }}>
-                Bắt đầu trong 3 bước
+                {t('landing.steps_title', lang)}
               </h2>
               <p
                 className="mx-auto mt-4"
                 style={{ color: "var(--ink-secondary)" }}
               >
-                Từ đăng ký đến giao hàng — chỉ cần vài phút.
+                {t('landing.steps_sub', lang)}
               </p>
             </div>
 
@@ -273,18 +266,18 @@ export default function Home() {
               {[
                 {
                   step: "01",
-                  title: "Đăng ký doanh nghiệp",
-                  desc: "Tạo tài khoản Seller hoặc Buyer với thông tin doanh nghiệp và mã số thuế.",
+                  title: t('landing.step1_title', lang),
+                  desc: t('landing.step1_desc', lang),
                 },
                 {
                   step: "02",
-                  title: "Đăng hàng hoặc đặt mua",
-                  desc: "Seller đăng sản phẩm lên marketplace. Buyer tìm kiếm và gửi yêu cầu mua.",
+                  title: t('landing.step2_title', lang),
+                  desc: t('landing.step2_desc', lang),
                 },
                 {
                   step: "03",
-                  title: "Giao dịch an toàn",
-                  desc: "Host kiểm duyệt, kết nối hai bên, báo giá logistics, và tạo đơn hàng.",
+                  title: t('landing.step3_title', lang),
+                  desc: t('landing.step3_desc', lang),
                 },
               ].map((item, i) => (
                 <article
@@ -331,7 +324,7 @@ export default function Home() {
               className="mb-4"
               style={{ color: "var(--ink-on-primary)" }}
             >
-              Sẵn sàng phát triển kinh doanh B2B?
+              {t('landing.cta_title', lang)}
             </h2>
             <p
               className="mx-auto mb-8"
@@ -340,8 +333,7 @@ export default function Home() {
                 maxWidth: "36rem",
               }}
             >
-              Tham gia cùng hàng trăm doanh nghiệp đang sử dụng StockFlow để
-              kết nối, mua bán, và vận chuyển hàng hóa B2B.
+              {t('landing.cta_sub', lang)}
             </p>
             <Link
               href="/register"
@@ -352,7 +344,7 @@ export default function Home() {
                 fontWeight: 700,
               }}
             >
-              Đăng ký miễn phí ngay
+              {t('landing.btn_cta', lang)}
             </Link>
           </div>
         </section>
@@ -371,7 +363,7 @@ export default function Home() {
             className="text-sm"
             style={{ color: "var(--ink-muted)", margin: 0, maxWidth: "none" }}
           >
-            © 2026 StockFlow B2B. Mọi quyền được bảo lưu.
+            © 2026 StockFlow B2B. {lang === 'ja' ? '無断転載を禁じます。' : 'Mọi quyền được bảo lưu.'}
           </p>
           <nav aria-label="Footer links" className="flex gap-6">
             <Link
@@ -379,14 +371,14 @@ export default function Home() {
               className="text-sm"
               style={{ color: "var(--ink-secondary)" }}
             >
-              Đăng nhập
+              {t('landing.btn_login', lang)}
             </Link>
             <Link
               href="/register"
               className="text-sm"
               style={{ color: "var(--ink-secondary)" }}
             >
-              Đăng ký
+              {t('landing.btn_register', lang)}
             </Link>
           </nav>
         </div>

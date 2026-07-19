@@ -133,7 +133,7 @@ export default function LoginPage() {
               letterSpacing: '-0.02em',
             }}
           >
-            {lang === 'ja' ? 'ログイン' : 'Đăng nhập'}
+            {t('auth.login_title', lang)}
           </h1>
           <p
             className="mx-auto mt-2 text-sm"
@@ -141,14 +141,14 @@ export default function LoginPage() {
               color: 'var(--ink-secondary)',
             }}
           >
-            Chào mừng trở lại. Nhập thông tin để tiếp tục.
+            {t('auth.login_subtitle', lang)}
           </p>
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-4 animate-fade-up">
           {/* Quick Demo Account Role Selection */}
           <div className="mb-4 p-3 rounded-xl bg-[var(--surface-sunken)] border border-[var(--border)]">
-            <p className="text-[11px] font-bold text-[var(--ink-muted)] mb-2 uppercase tracking-wide">⚡ Chọn tài khoản Demo nhanh</p>
+            <p className="text-[11px] font-bold text-[var(--ink-muted)] mb-2 uppercase tracking-wide">{t('auth.quick_demo', lang)}</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <button
                 type="button"
@@ -163,7 +163,7 @@ export default function LoginPage() {
                     : 'bg-[var(--surface)] text-[var(--ink)] border-[var(--border)] hover:border-[var(--primary)]'
                 }`}
               >
-                🛒 Người mua (Buyer)
+                🛒 {t('role.buyer', lang)}
               </button>
 
               <button
@@ -179,7 +179,7 @@ export default function LoginPage() {
                     : 'bg-[var(--surface)] text-[var(--ink)] border-[var(--border)] hover:border-[var(--primary)]'
                 }`}
               >
-                📦 Người bán (Seller)
+                📦 {t('role.seller', lang)}
               </button>
 
               <button
@@ -195,7 +195,7 @@ export default function LoginPage() {
                     : 'bg-[var(--surface)] text-[var(--ink)] border-[var(--border)] hover:border-[var(--primary)]'
                 }`}
               >
-                🚛 Vận tải (Carrier)
+                🚛 {t('role.carrier', lang)}
               </button>
 
               <button
@@ -211,14 +211,14 @@ export default function LoginPage() {
                     : 'bg-[var(--surface)] text-[var(--ink)] border-[var(--border)] hover:border-[var(--primary)]'
                 }`}
               >
-                👔 Điều phối (Host)
+                👔 {t('role.host', lang)}
               </button>
             </div>
           </div>
 
           <div className="form-group">
             <label htmlFor="email-input" className="sf-label">
-              Email
+              {t('auth.email_label', lang)}
             </label>
             <input
               id="email-input"
@@ -236,14 +236,14 @@ export default function LoginPage() {
           <div className="form-group">
             <div className="flex justify-between items-center mb-1">
               <label htmlFor="password-input" className="sf-label mb-0">
-                Mật khẩu
+                {t('auth.password_label', lang)}
               </label>
               <a
                 href="#"
                 onClick={(e) => e.preventDefault()}
                 className="text-xs text-[var(--primary)] hover:underline"
               >
-                Quên mật khẩu?
+                {t('auth.forgot_password', lang)}
               </a>
             </div>
             <input
@@ -285,10 +285,10 @@ export default function LoginPage() {
                 >
                   <path d="M21 12a9 9 0 1 1-6.219-8.56" />
                 </svg>
-                Đang xử lý…
+                Processing…
               </span>
             ) : (
-              'Đăng nhập'
+              t('auth.login_btn', lang)
             )}
           </button>
 
@@ -303,12 +303,12 @@ export default function LoginPage() {
           className="mt-6 text-center text-xs"
           style={{ color: 'var(--ink-secondary)' }}
         >
-          Chưa có tài khoản?{' '}
+          {t('auth.no_account', lang)}{' '}
           <Link
             href="/register"
             className="font-bold text-[var(--primary)] hover:underline"
           >
-            Đăng ký doanh nghiệp
+            {t('auth.register_link', lang)}
           </Link>
         </p>
       </section>
