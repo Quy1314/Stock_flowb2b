@@ -13,9 +13,18 @@ import {
   mockUpdateOrderStatus,
   mockUpdateShipmentStatus,
 } from '@/utils/mockStore'
+import { getLanguage, t, Language } from '@/utils/i18n'
 
 export default function HostDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'moderation' | 'logistics' | 'orders' | 'shipments'>('overview')
+  const [lang, setLang] = useState<Language>('vi')
+
+  useEffect(() => {
+    setLang(getLanguage())
+    const handleLang = (e: any) => setLang(e.detail || getLanguage())
+    window.addEventListener('stockflow-lang-changed', handleLang)
+    return () => window.removeEventListener('stockflow-lang-changed', handleLang)
+  }, [])
 
   // Real + Mock state
   const [pendingListings, setPendingListings] = useState<any[]>([])
@@ -203,21 +212,21 @@ export default function HostDashboard() {
       {activeTab === 'overview' && (
         <div className="space-y-8">
           <div className="welcome-hero">
-            <h1>Chào mừng, Host Điều Phối!</h1>
-            <p>Kiểm duyệt bài đăng, liên kết các bên, quản lý cước logistics và theo dõi đơn hàng B2B.</p>
+            <h1>{t('title.welcome_host', lang)}</h1>
+            <p>{t('sub.host_desc', lang)}</p>
           </div>
 
           <div className="metrics-grid">
             <div className="metric-card">
-              <span>Tin đăng chờ duyệt</span>
+              <span>{t('metric.host_pending_moderation', lang)}</span>
               <h3>{pendingListings.length}</h3>
             </div>
             <div className="metric-card">
-              <span>Đơn mua chờ xử lý</span>
+              <span>{t('metric.host_pending_orders', lang)}</span>
               <h3>{purchaseRequests.filter(r => r.status === 'submitted' || r.status === 'seller_confirmed').length}</h3>
             </div>
             <div className="metric-card">
-              <span>Đơn vận chuyển đang đi</span>
+              <span>{t('metric.host_in_transit', lang)}</span>
               <h3>{shipments.filter(s => s.status === 'in_transit').length}</h3>
             </div>
           </div>

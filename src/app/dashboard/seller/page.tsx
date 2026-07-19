@@ -5,9 +5,18 @@ import { createListing, getListings } from '@/app/actions/listing'
 import { createWarehouse, getWarehouses } from '@/app/actions/warehouse'
 import { respondPurchaseRequest } from '@/app/actions/marketplace'
 import { getSharedState, mockAddListing, mockUpdatePurchaseRequest } from '@/utils/mockStore'
+import { getLanguage, t, Language } from '@/utils/i18n'
 
 export default function SellerDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'requests' | 'warehouses'>('overview')
+  const [lang, setLang] = useState<Language>('vi')
+
+  useEffect(() => {
+    setLang(getLanguage())
+    const handleLang = (e: any) => setLang(e.detail || getLanguage())
+    window.addEventListener('stockflow-lang-changed', handleLang)
+    return () => window.removeEventListener('stockflow-lang-changed', handleLang)
+  }, [])
 
   // Real + Mock state
   const [listings, setListings] = useState<any[]>([])
@@ -313,21 +322,21 @@ export default function SellerDashboard() {
       {activeTab === 'overview' && (
         <div className="space-y-8">
           <div className="welcome-hero">
-            <h1>Chào mừng trở lại, Seller!</h1>
-            <p>Quản lý kho hàng dư thừa và tối ưu hóa doanh thu của bạn.</p>
+            <h1>{t('title.welcome_seller', lang)}</h1>
+            <p>{t('sub.seller_desc', lang)}</p>
           </div>
 
           <div className="metrics-grid">
             <div className="metric-card">
-              <span>Tổng lượng hàng đăng ký</span>
+              <span>{t('metric.total_listings', lang)}</span>
               <h3>{listings.reduce((acc, curr) => acc + (curr.quantity || 0), 0).toLocaleString()}</h3>
             </div>
             <div className="metric-card">
-              <span>Lô hàng đang hiển thị</span>
+              <span>{t('status.approved', lang)}</span>
               <h3>{listings.filter(l => l.status === 'approved').length}</h3>
             </div>
             <div className="metric-card">
-              <span>Lô hàng chờ duyệt</span>
+              <span>{t('metric.pending_requests', lang)}</span>
               <h3>{listings.filter(l => l.status === 'pending_review').length}</h3>
             </div>
           </div>
@@ -344,10 +353,10 @@ export default function SellerDashboard() {
               }}
               className="sf-btn sf-btn-primary"
             >
-              ➕ Đăng lô hàng thanh lý mới
+              {t('action.add_new', lang)}
             </button>
             <button onClick={() => setShowWarehouseModal(true)} className="sf-btn sf-btn-secondary">
-              🏢 Thiết lập thêm kho hàng
+              {t('action.add_warehouse', lang)}
             </button>
           </div>
 
@@ -396,7 +405,7 @@ export default function SellerDashboard() {
       {activeTab === 'listings' && (
         <section className="sf-card">
           <div className="section-header">
-            <h2>Sản phẩm của tôi</h2>
+            <h2>{t('sec.my_listings', lang)}</h2>
             <button
               onClick={() => {
                 setProductImages([])
@@ -408,7 +417,7 @@ export default function SellerDashboard() {
               }}
               className="sf-btn sf-btn-primary"
             >
-              ➕ Thêm mới
+              {t('action.add_new', lang)}
             </button>
           </div>
 
@@ -416,12 +425,12 @@ export default function SellerDashboard() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Tên sản phẩm</th>
-                  <th>Danh mục</th>
-                  <th>Số lượng</th>
-                  <th>Đơn giá</th>
-                  <th>Số lô</th>
-                  <th>Trạng thái</th>
+                  <th>{t('th.product_name', lang)}</th>
+                  <th>{t('th.category', lang)}</th>
+                  <th>{t('th.quantity', lang)}</th>
+                  <th>{t('th.unit_price', lang)}</th>
+                  <th>{t('th.lot_number', lang)}</th>
+                  <th>{t('th.status', lang)}</th>
                 </tr>
               </thead>
               <tbody>
@@ -434,7 +443,7 @@ export default function SellerDashboard() {
                     <td className="font-mono text-xs">{lst.lot_number || '—'}</td>
                     <td>
                       <span className={`badge ${lst.status === 'approved' ? 'badge-success' : lst.status === 'pending_review' ? 'badge-warning' : 'badge-danger'}`}>
-                        {lst.status === 'approved' ? 'Đã duyệt' : lst.status === 'pending_review' ? 'Chờ duyệt' : 'Từ chối'}
+                        {lst.status === 'approved' ? t('status.approved', lang) : lst.status === 'pending_review' ? t('status.pending_review', lang) : t('status.rejected', lang)}
                       </span>
                     </td>
                   </tr>
@@ -449,20 +458,20 @@ export default function SellerDashboard() {
       {activeTab === 'requests' && (
         <section className="sf-card">
           <div className="section-header">
-            <h2>Đơn mua từ khách hàng</h2>
+            <h2>{t('sec.customer_requests', lang)}</h2>
           </div>
 
           <div className="overflow-x-auto mt-4">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Sản phẩm</th>
-                  <th>Khách hàng</th>
-                  <th>Số lượng</th>
-                  <th>Đơn giá đề xuất</th>
-                  <th>Ghi chú</th>
-                  <th>Trạng thái</th>
-                  <th>Hành động</th>
+                  <th>{t('th.product_name', lang)}</th>
+                  <th>{t('th.customer', lang)}</th>
+                  <th>{t('th.quantity', lang)}</th>
+                  <th>{t('th.proposed_price', lang)}</th>
+                  <th>{t('th.notes', lang)}</th>
+                  <th>{t('th.status', lang)}</th>
+                  <th>{t('th.actions', lang)}</th>
                 </tr>
               </thead>
               <tbody>
@@ -479,17 +488,17 @@ export default function SellerDashboard() {
                         req.status === 'seller_confirmed' ? 'badge-success' : 
                         'badge-danger'
                       }`}>
-                        {req.status === 'submitted' ? 'Chờ phản hồi' : req.status === 'seller_confirmed' ? 'Đã đồng ý' : 'Đã từ chối'}
+                        {req.status === 'submitted' ? t('status.submitted', lang) : req.status === 'seller_confirmed' ? t('status.seller_confirmed', lang) : t('status.seller_rejected', lang)}
                       </span>
                     </td>
                     <td>
                       {req.status === 'submitted' && (
                         <div className="flex items-center gap-3.5 flex-wrap">
                           <button onClick={() => handleRespondRequest(req.id, true)} className="sf-btn sf-btn-primary py-1.5 px-3 text-xs">
-                            Đồng ý
+                            {t('action.agree', lang)}
                           </button>
                           <button onClick={() => handleRespondRequest(req.id, false)} className="sf-btn sf-btn-ghost text-rose-500 py-1.5 px-3 text-xs">
-                            Từ chối
+                            {t('action.reject', lang)}
                           </button>
                         </div>
                       )}
@@ -506,9 +515,9 @@ export default function SellerDashboard() {
       {activeTab === 'warehouses' && (
         <section className="sf-card">
           <div className="section-header">
-            <h2>Danh sách kho hàng doanh nghiệp</h2>
+            <h2>{t('sec.warehouses', lang)}</h2>
             <button onClick={() => setShowWarehouseModal(true)} className="sf-btn sf-btn-primary">
-              ➕ Thiết lập kho mới
+              {t('action.add_warehouse', lang)}
             </button>
           </div>
 

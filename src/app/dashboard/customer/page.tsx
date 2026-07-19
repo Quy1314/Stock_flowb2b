@@ -12,9 +12,18 @@ import {
   mockConfirmLogisticsQuote,
   mockUpdateOrderStatus,
 } from '@/utils/mockStore'
+import { getLanguage, t, Language } from '@/utils/i18n'
 
 export default function CustomerDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'marketplace' | 'requests' | 'warehouses'>('overview')
+  const [lang, setLang] = useState<Language>('vi')
+
+  useEffect(() => {
+    setLang(getLanguage())
+    const handleLang = (e: any) => setLang(e.detail || getLanguage())
+    window.addEventListener('stockflow-lang-changed', handleLang)
+    return () => window.removeEventListener('stockflow-lang-changed', handleLang)
+  }, [])
 
   // Real + Mock state
   const [listings, setListings] = useState<any[]>([])
@@ -207,21 +216,21 @@ export default function CustomerDashboard() {
       {activeTab === 'overview' && (
         <div className="space-y-8">
           <div className="welcome-hero">
-            <h1>Chào mừng trở lại, Buyer!</h1>
-            <p>Khám phá thị trường B2B và quản lý đơn đặt hàng của doanh nghiệp.</p>
+            <h1>{t('title.welcome_buyer', lang)}</h1>
+            <p>{t('sub.buyer_desc', lang)}</p>
           </div>
 
           <div className="metrics-grid">
             <div className="metric-card">
-              <span>Đang yêu cầu mua</span>
+              <span>{t('metric.buyer_pending_requests', lang)}</span>
               <h3>{myRequests.filter(r => r.status === 'submitted' || r.status === 'quoted').length}</h3>
             </div>
             <div className="metric-card">
-              <span>Đơn hàng đã chốt</span>
+              <span>{t('metric.buyer_confirmed_orders', lang)}</span>
               <h3>{myRequests.filter(r => r.status === 'buyer_confirmed' || r.status === 'converted_to_order').length}</h3>
             </div>
             <div className="metric-card">
-              <span>Sản phẩm khả dụng trên sàn</span>
+              <span>{t('metric.marketplace_available', lang)}</span>
               <h3>{listings.length}</h3>
             </div>
           </div>

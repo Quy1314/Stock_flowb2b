@@ -2,9 +2,18 @@
 
 import React, { useEffect, useState } from 'react'
 import { getSharedState, saveSharedState } from '@/utils/mockStore'
+import { getLanguage, t, Language } from '@/utils/i18n'
 
 export default function CarrierDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'trips' | 'capacity'>('overview')
+  const [lang, setLang] = useState<Language>('vi')
+
+  useEffect(() => {
+    setLang(getLanguage())
+    const handleLang = (e: any) => setLang(e.detail || getLanguage())
+    window.addEventListener('stockflow-lang-changed', handleLang)
+    return () => window.removeEventListener('stockflow-lang-changed', handleLang)
+  }, [])
 
   // Capacity states
   const [capacity, setCapacity] = useState({
