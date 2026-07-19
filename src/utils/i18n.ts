@@ -122,8 +122,23 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'list_modal.mfg_date_label': 'Ngày sản xuất',
     'list_modal.exp_date_label': 'Hạn sử dụng',
     'list_modal.description_label': 'Mô tả ngắn',
+    'list_modal.desc_placeholder': 'Mô tả chi tiết về lô hàng...',
     'list_modal.docs_label': 'Giấy chứng nhận và chứng từ liên quan',
+    'list_modal.doc_types_label': 'Loại chứng từ đính kèm (chọn nhiều)',
+    'list_modal.upload_docs_label': 'Tải lên chứng từ (Tối đa 8 files, PDF/Ảnh)',
+    'list_modal.doc_notes_label': 'Ghi chú bộ chứng từ',
+    'list_modal.doc_notes_placeholder': 'Ví dụ: Giấy chứng nhận ATTP số hiệu...',
+    'list_modal.commitment_label': 'Tôi cam kết các thông tin đăng bán trên là chính xác và hoàn toàn chịu trách nhiệm trước pháp luật.',
     'list_modal.submit_btn': 'Khởi tạo lô hàng thanh lý',
+
+    // Document Types
+    'doc.invoice_origin': 'Hóa đơn hoặc chứng từ nguồn gốc',
+    'doc.quality_cert': 'Giấy chứng nhận chất lượng',
+    'doc.quarantine_cert': 'Giấy kiểm dịch',
+    'doc.traceability_file': 'Hồ sơ truy xuất nguồn gốc',
+    'doc.food_safety_cert': 'Giấy chứng nhận an toàn thực phẩm',
+    'doc.spec_sheet': 'Thông số kỹ thuật',
+    'doc.other_doc': 'Chứng từ khác',
 
     // Customer Requests & Orders
     'cust_orders.title': 'Yêu cầu & Đơn hàng của tôi',
@@ -364,8 +379,23 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'list_modal.mfg_date_label': '製造年月日',
     'list_modal.exp_date_label': '賞味・消費期限',
     'list_modal.description_label': '商品説明',
+    'list_modal.desc_placeholder': '商品の詳細説明...',
     'list_modal.docs_label': '関連証明書・添付書類',
+    'list_modal.doc_types_label': '添付書類の種類（複数選択可）',
+    'list_modal.upload_docs_label': '書類アップロード（最大8ファイル、PDF/画像）',
+    'list_modal.doc_notes_label': '添付書類の備考',
+    'list_modal.doc_notes_placeholder': '例：品質証明書番号...',
+    'list_modal.commitment_label': '掲載情報が正確であり、法的責任を負うことを誓約します。',
     'list_modal.submit_btn': '出品を確定する',
+
+    // Document Types
+    'doc.invoice_origin': '請求書または原産地証明書',
+    'doc.quality_cert': '品質保証・検査証明書',
+    'doc.quarantine_cert': '検疫証明書',
+    'doc.traceability_file': 'トレーサビリティ書類',
+    'doc.food_safety_cert': '食品安全衛生証明書',
+    'doc.spec_sheet': '仕様書・テクニカルシート',
+    'doc.other_doc': 'その他の関連書類',
 
     // Customer Requests & Orders
     'cust_orders.title': 'マイリクエスト & 注文一覧',

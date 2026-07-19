@@ -375,18 +375,22 @@ export default function SellerDashboard() {
           <div className="flex gap-4">
             <button
               onClick={() => {
-                setProductImages([])
-                setDocuments([])
-                setDocNotes('')
-                setSelectedDocTypes([])
-                setCreatedPreview(null)
-                setShowListingModal(true)
+                if (showListingModal) {
+                  setShowListingModal(false)
+                } else {
+                  setProductImages([])
+                  setDocuments([])
+                  setDocNotes('')
+                  setSelectedDocTypes([])
+                  setCreatedPreview(null)
+                  setShowListingModal(true)
+                }
               }}
               className="sf-btn sf-btn-primary"
             >
               {t('action.add_new', lang)}
             </button>
-            <button onClick={() => setShowWarehouseModal(true)} className="sf-btn sf-btn-secondary">
+            <button onClick={() => setShowWarehouseModal(!showWarehouseModal)} className="sf-btn sf-btn-secondary">
               {t('action.add_warehouse', lang)}
             </button>
           </div>
@@ -439,12 +443,16 @@ export default function SellerDashboard() {
             <h2>{t('sec.my_listings', lang)}</h2>
             <button
               onClick={() => {
-                setProductImages([])
-                setDocuments([])
-                setDocNotes('')
-                setSelectedDocTypes([])
-                setCreatedPreview(null)
-                setShowListingModal(true)
+                if (showListingModal) {
+                  setShowListingModal(false)
+                } else {
+                  setProductImages([])
+                  setDocuments([])
+                  setDocNotes('')
+                  setSelectedDocTypes([])
+                  setCreatedPreview(null)
+                  setShowListingModal(true)
+                }
               }}
               className="sf-btn sf-btn-primary"
             >
@@ -547,7 +555,7 @@ export default function SellerDashboard() {
         <section className="sf-card">
           <div className="section-header">
             <h2>{t('sec.warehouses', lang)}</h2>
-            <button onClick={() => setShowWarehouseModal(true)} className="sf-btn sf-btn-primary">
+            <button onClick={() => setShowWarehouseModal(!showWarehouseModal)} className="sf-btn sf-btn-primary">
               {t('action.add_warehouse', lang)}
             </button>
           </div>
@@ -747,11 +755,11 @@ export default function SellerDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="sf-label">Mô tả ngắn</label>
+                <label className="sf-label">{t('list_modal.description_label', lang)}</label>
                 <textarea
                   value={newListing.description}
                   onChange={e => setNewListing({ ...newListing, description: e.target.value })}
-                  placeholder="Mô tả chi tiết về lô hàng..."
+                  placeholder={t('list_modal.desc_placeholder', lang)}
                   className="sf-input"
                   rows={2}
                 />
@@ -759,31 +767,31 @@ export default function SellerDashboard() {
 
               {/* Document verification block */}
               <div className="form-group border-t border-[var(--border)] pt-4">
-                <h4 className="font-bold text-sm text-[var(--ink)] mb-2">Giấy chứng nhận và chứng từ liên quan</h4>
-                <label className="sf-label">Loại chứng từ đính kèm (chọn nhiều)</label>
+                <h4 className="font-bold text-sm text-[var(--ink)] mb-2">{t('list_modal.docs_label', lang)}</h4>
+                <label className="sf-label">{t('list_modal.doc_types_label', lang)}</label>
                 <div className="grid grid-cols-2 gap-2 text-xs mb-3 text-[var(--ink-secondary)]">
                   {[
-                    'Hóa đơn hoặc chứng từ nguồn gốc',
-                    'Giấy chứng nhận chất lượng',
-                    'Giấy kiểm dịch',
-                    'Hồ sơ truy xuất nguồn gốc',
-                    'Giấy chứng nhận an toàn thực phẩm',
-                    'Thông số kỹ thuật',
-                    'Chứng từ khác',
-                  ].map((docType) => (
-                    <label key={docType} className="flex items-center gap-2 cursor-pointer font-normal">
+                    'doc.invoice_origin',
+                    'doc.quality_cert',
+                    'doc.quarantine_cert',
+                    'doc.traceability_file',
+                    'doc.food_safety_cert',
+                    'doc.spec_sheet',
+                    'doc.other_doc',
+                  ].map((docKey) => (
+                    <label key={docKey} className="flex items-center gap-2 cursor-pointer font-normal">
                       <input
                         type="checkbox"
-                        checked={selectedDocTypes.includes(docType)}
-                        onChange={() => handleDocTypeToggle(docType)}
+                        checked={selectedDocTypes.includes(docKey)}
+                        onChange={() => handleDocTypeToggle(docKey)}
                         className="rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)]"
                       />
-                      {docType}
+                      {t(docKey, lang)}
                     </label>
                   ))}
                 </div>
 
-                <label className="sf-label">Tải lên chứng từ (Tối đa 8 files, PDF/Ảnh)</label>
+                <label className="sf-label">{t('list_modal.upload_docs_label', lang)}</label>
                 <input
                   type="file"
                   multiple
@@ -818,10 +826,10 @@ export default function SellerDashboard() {
                 )}
 
                 <div className="form-group mt-3">
-                  <label className="sf-label">Ghi chú bộ chứng từ</label>
+                  <label className="sf-label">{t('list_modal.doc_notes_label', lang)}</label>
                   <input
                     type="text"
-                    placeholder="Ví dụ: Giấy chứng nhận ATTP số hiệu..."
+                    placeholder={t('list_modal.doc_notes_placeholder', lang)}
                     value={docNotes}
                     onChange={e => setDocNotes(e.target.value)}
                     className="sf-input"
@@ -838,7 +846,7 @@ export default function SellerDashboard() {
                   className="mt-1"
                 />
                 <label htmlFor="commit-check" className="text-xs text-[var(--ink-secondary)] cursor-pointer">
-                  Tôi cam kết các thông tin đăng bán trên là chính xác và hoàn toàn chịu trách nhiệm trước pháp luật.
+                  {t('list_modal.commitment_label', lang)}
                 </label>
               </div>
 
@@ -848,10 +856,10 @@ export default function SellerDashboard() {
                   onClick={() => setShowListingModal(false)}
                   className="sf-btn sf-btn-ghost flex-1"
                 >
-                  Hủy
+                  {t('action.cancel', lang)}
                 </button>
                 <button type="submit" className="sf-btn sf-btn-primary flex-1">
-                  Đăng tin thanh lý
+                  {t('list_modal.submit_btn', lang)}
                 </button>
               </div>
             </form>
@@ -864,17 +872,17 @@ export default function SellerDashboard() {
         <div className="modal flex">
           <div className="modal-content animate-scale-in">
             <div className="modal-header">
-              <h3>Thiết lập kho hàng doanh nghiệp</h3>
+              <h3>{t('wh_modal.title', lang)}</h3>
               <button onClick={() => setShowWarehouseModal(false)} className="close-btn">&times;</button>
             </div>
             
             <form onSubmit={handleCreateWarehouse} className="space-y-4">
               <div className="form-group">
-                <label className="sf-label">Tên kho</label>
+                <label className="sf-label">{t('wh_modal.name_label', lang)}</label>
                 <input
                   type="text"
                   required
-                  placeholder="Ví dụ: Kho Tổng Đông Anh"
+                  placeholder={t('wh_modal.name_placeholder', lang)}
                   value={newWarehouse.name}
                   onChange={e => setNewWarehouse({ ...newWarehouse, name: e.target.value })}
                   className="sf-input"
@@ -882,11 +890,11 @@ export default function SellerDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="sf-label">Số điện thoại liên hệ</label>
+                <label className="sf-label">{t('wh_modal.phone_label', lang)}</label>
                 <input
                   type="text"
                   required
-                  placeholder="Số hotline kho"
+                  placeholder={t('wh_modal.phone_placeholder', lang)}
                   value={newWarehouse.phone}
                   onChange={e => setNewWarehouse({ ...newWarehouse, phone: e.target.value })}
                   className="sf-input"
@@ -894,11 +902,11 @@ export default function SellerDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="sf-label">Địa chỉ</label>
+                <label className="sf-label">{t('wh_modal.address_label', lang)}</label>
                 <input
                   type="text"
                   required
-                  placeholder="Số nhà, ngõ, đường..."
+                  placeholder={t('wh_modal.address_placeholder', lang)}
                   value={newWarehouse.address}
                   onChange={e => setNewWarehouse({ ...newWarehouse, address: e.target.value })}
                   className="sf-input"
@@ -906,16 +914,16 @@ export default function SellerDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="sf-label">Thành phố</label>
+                <label className="sf-label">{t('wh_modal.city_label', lang)}</label>
                 <select
                   value={newWarehouse.city}
                   onChange={e => setNewWarehouse({ ...newWarehouse, city: e.target.value })}
                   className="sf-select"
                 >
-                  <option value="Hà Nội">Hà Nội</option>
-                  <option value="Hồ Chí Minh">TP. Hồ Chí Minh</option>
-                  <option value="Bình Dương">Bình Dương</option>
-                  <option value="Đà Nẵng">Đà Nẵng</option>
+                  <option value="Hà Nội">{lang === 'ja' ? 'ハノイ (Hanoi)' : 'Hà Nội'}</option>
+                  <option value="Hồ Chí Minh">{lang === 'ja' ? 'ホーチミン (Ho Chi Minh)' : 'TP. Hồ Chí Minh'}</option>
+                  <option value="Bình Dương">{lang === 'ja' ? 'ビンズオン (Binh Duong)' : 'Bình Dương'}</option>
+                  <option value="Đà Nẵng">{lang === 'ja' ? 'ダナン (Da Nang)' : 'Đà Nẵng'}</option>
                 </select>
               </div>
 
@@ -925,10 +933,10 @@ export default function SellerDashboard() {
                   onClick={() => setShowWarehouseModal(false)}
                   className="sf-btn sf-btn-ghost flex-1"
                 >
-                  Hủy
+                  {t('action.cancel', lang)}
                 </button>
                 <button type="submit" className="sf-btn sf-btn-primary flex-1">
-                  Khởi tạo kho hàng
+                  {t('wh_modal.submit_btn', lang)}
                 </button>
               </div>
             </form>
