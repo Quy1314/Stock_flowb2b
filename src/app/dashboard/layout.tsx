@@ -49,6 +49,7 @@ export default function DashboardLayout({
   const [role, setRole] = useState<'seller' | 'customer' | 'host' | 'carrier' | null>(null)
   const [companyName, setCompanyName] = useState('Đang tải...')
   const [userName, setUserName] = useState('Đang tải...')
+  const [activeTab, setActiveTab] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
@@ -79,6 +80,17 @@ export default function DashboardLayout({
     }
   }, [pathname])
 
+  // Sync activeTab state with window location hash
+  useEffect(() => {
+    const syncHash = () => {
+      const hash = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : 'overview'
+      setActiveTab(hash || 'overview')
+    }
+    syncHash()
+    window.addEventListener('hashchange', syncHash)
+    return () => window.removeEventListener('hashchange', syncHash)
+  }, [])
+
   const handleLogout = () => {
     document.cookie = 'sb-mock-role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
     router.push('/login')
@@ -86,16 +98,13 @@ export default function DashboardLayout({
 
   /** Navigate sidebar: update hash + dispatch hashchange so child pages pick it up */
   const handleTabClick = useCallback((tabId: string) => {
-    // Update the URL hash
+    setActiveTab(tabId)
     window.location.hash = tabId
-    // Manually dispatch hashchange so child pages (seller, customer, etc.) can react
     window.dispatchEvent(new HashChangeEvent('hashchange'))
-    // Close mobile sidebar
     setSidebarOpen(false)
   }, [])
 
   const tabs = role ? (ROLE_TABS[role] || []) : []
-  const currentHash = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : 'overview'
 
   return (
     <div className="sf-dashboard-shell">
@@ -127,7 +136,7 @@ export default function DashboardLayout({
 
         <nav className="sf-sidebar__nav">
           {tabs.map((tab) => {
-            const isActive = currentHash === tab.id || (!currentHash && tab.id === 'overview')
+            const isActive = activeTab === tab.id
             return (
               <button
                 key={tab.id}
