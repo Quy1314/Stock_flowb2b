@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { isSupabaseConfigured } from '@/utils/envCheck'
 
 /** Tab definitions per role */
 const ROLE_TABS: Record<string, { id: string; label: string; icon: string }[]> = {
@@ -187,12 +188,21 @@ export default function DashboardLayout({
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
 
-          <div className="sf-topbar__profile">
+          <div className="sf-topbar__profile flex items-center gap-3">
             <div className="sf-topbar__avatar">
               {userName.substring(0, 2).toUpperCase()}
             </div>
             <div>
-              <h4 className="sf-topbar__company">{companyName}</h4>
+              <div className="flex items-center gap-2">
+                <h4 className="sf-topbar__company">{companyName}</h4>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  isSupabaseConfigured() 
+                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' 
+                    : 'bg-amber-100 text-amber-800 border border-amber-300'
+                }`}>
+                  {isSupabaseConfigured() ? '🟢 Supabase Real DB' : '🟠 Demo Mock Mode'}
+                </span>
+              </div>
               <span className="sf-topbar__role">{role ? ROLE_LABELS[role] : ''}</span>
             </div>
           </div>

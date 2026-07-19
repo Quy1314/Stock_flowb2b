@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { isSupabaseConfigured } from '@/utils/envCheck'
 
 export async function createListing(formData: {
   productName: string
@@ -20,6 +21,10 @@ export async function createListing(formData: {
 }) {
   if (!formData.isCommitted) {
     return { success: false, error: 'Bạn phải cam kết thông tin đúng sự thật.' }
+  }
+
+  if (!isSupabaseConfigured()) {
+    return { success: false, isMock: true, error: 'Supabase DB chưa cấu hình (Chạy trên Demo Mock Mode).' }
   }
 
   const supabase = await createClient()
@@ -81,6 +86,8 @@ export async function createListing(formData: {
 }
 
 export async function getListings() {
+  if (!isSupabaseConfigured()) return []
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
@@ -94,6 +101,10 @@ export async function getListings() {
 }
 
 export async function reviewListing(listingId: string, approve: boolean, reason?: string) {
+  if (!isSupabaseConfigured()) {
+    return { success: false, isMock: true, error: 'Supabase DB chưa cấu hình (Chạy trên Demo Mock Mode).' }
+  }
+
   const supabase = await createClient()
 
   // 1. Get user session
@@ -130,4 +141,3 @@ export async function reviewListing(listingId: string, approve: boolean, reason?
 
   return { success: true, data }
 }
-

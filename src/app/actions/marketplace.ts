@@ -1,12 +1,15 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { isSupabaseConfigured } from '@/utils/envCheck'
 
 export async function getMarketplaceListings(filters?: {
   search?: string
   categoryId?: number
   locationText?: string
 }) {
+  if (!isSupabaseConfigured()) return []
+
   const supabase = await createClient()
 
   let query = supabase.from('marketplace_listings').select('*')
@@ -38,6 +41,10 @@ export async function createPurchaseRequest(formData: {
   buyerWarehouseId: string
   buyerNote?: string
 }) {
+  if (!isSupabaseConfigured()) {
+    return { success: false, isMock: true, error: 'Supabase DB chưa cấu hình (Chạy trên Demo Mock Mode).' }
+  }
+
   const supabase = await createClient()
 
   // 1. Get user session
@@ -108,6 +115,10 @@ export async function createPurchaseRequest(formData: {
 }
 
 export async function assignCoordinator(requestId: string, coordinatorId: string) {
+  if (!isSupabaseConfigured()) {
+    return { success: false, isMock: true, error: 'Supabase DB chưa cấu hình (Chạy trên Demo Mock Mode).' }
+  }
+
   const supabase = await createClient()
 
   // 1. Get user session
@@ -150,6 +161,10 @@ export async function assignCoordinator(requestId: string, coordinatorId: string
 }
 
 export async function respondPurchaseRequest(requestId: string, approve: boolean, reason?: string) {
+  if (!isSupabaseConfigured()) {
+    return { success: false, isMock: true, error: 'Supabase DB chưa cấu hình (Chạy trên Demo Mock Mode).' }
+  }
+
   const supabase = await createClient()
 
   // 1. Get user session

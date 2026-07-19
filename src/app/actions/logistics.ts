@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/utils/supabase/server'
+import { isSupabaseConfigured } from '@/utils/envCheck'
 
 export async function submitLogisticsQuote(
   requestId: string,
@@ -11,6 +12,10 @@ export async function submitLogisticsQuote(
   logisticsPartnerId?: string,
   note?: string
 ) {
+  if (!isSupabaseConfigured()) {
+    return { success: false, isMock: true, error: 'Supabase DB chưa cấu hình (Chạy trên Demo Mock Mode).' }
+  }
+
   const supabase = await createClient()
 
   // 1. Get user session
@@ -56,6 +61,10 @@ export async function submitLogisticsQuote(
 }
 
 export async function approveLogisticsQuote(requestId: string) {
+  if (!isSupabaseConfigured()) {
+    return { success: false, isMock: true, error: 'Supabase DB chưa cấu hình (Chạy trên Demo Mock Mode).' }
+  }
+
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -89,6 +98,10 @@ export async function approveLogisticsQuote(requestId: string) {
 }
 
 export async function updateShipmentStatus(shipmentId: string, statusText: string, notes?: string) {
+  if (!isSupabaseConfigured()) {
+    return { success: false, isMock: true, error: 'Supabase DB chưa cấu hình (Chạy trên Demo Mock Mode).' }
+  }
+
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -120,6 +133,10 @@ export async function updateShipmentStatus(shipmentId: string, statusText: strin
 }
 
 export async function confirmDelivery(shipmentId: string) {
+  if (!isSupabaseConfigured()) {
+    return { success: false, isMock: true, error: 'Supabase DB chưa cấu hình (Chạy trên Demo Mock Mode).' }
+  }
+
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -145,6 +162,10 @@ export async function confirmDelivery(shipmentId: string) {
 }
 
 export async function submitPaymentReceipt(orderId: string, amount: number, receiptPath: string) {
+  if (!isSupabaseConfigured()) {
+    return { success: false, isMock: true, error: 'Supabase DB chưa cấu hình (Chạy trên Demo Mock Mode).' }
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Người dùng chưa đăng nhập.' }
@@ -176,6 +197,10 @@ export async function submitPaymentReceipt(orderId: string, amount: number, rece
 }
 
 export async function confirmPaymentReceipt(paymentId: string) {
+  if (!isSupabaseConfigured()) {
+    return { success: false, isMock: true, error: 'Supabase DB chưa cấu hình (Chạy trên Demo Mock Mode).' }
+  }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { success: false, error: 'Người dùng chưa đăng nhập.' }
