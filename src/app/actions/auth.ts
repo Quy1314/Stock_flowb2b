@@ -75,7 +75,22 @@ export async function loginUser(
   password?: string,
   mockRole?: 'seller' | 'customer' | 'host' | 'carrier' | 'none'
 ) {
-  // If mockRole is provided, we bypass normal login in development/demo mode and return success with mock role!
+  // Demo account email recognition
+  const lowerEmail = email.toLowerCase().trim()
+  if (lowerEmail === 'buyer@stockflow.b2b' || lowerEmail === 'customer@stockflow.b2b') {
+    return { success: true, role: 'customer' }
+  }
+  if (lowerEmail === 'seller@stockflow.b2b') {
+    return { success: true, role: 'seller' }
+  }
+  if (lowerEmail === 'host@stockflow.b2b') {
+    return { success: true, role: 'host' }
+  }
+  if (lowerEmail === 'carrier@stockflow.b2b') {
+    return { success: true, role: 'carrier' }
+  }
+
+  // If mockRole is explicitly provided
   if (mockRole && mockRole !== 'none') {
     return { success: true, role: mockRole }
   }

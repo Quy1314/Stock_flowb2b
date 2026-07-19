@@ -115,6 +115,76 @@ export default function LoginPage() {
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-4 animate-fade-up">
+          {/* Quick Demo Account Role Selection */}
+          <div className="mb-4 p-3 rounded-xl bg-[var(--surface-sunken)] border border-[var(--border)]">
+            <p className="text-[11px] font-bold text-[var(--ink-muted)] mb-2 uppercase tracking-wide">⚡ Chọn tài khoản Demo nhanh</p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('buyer@stockflow.b2b')
+                  setPassword('Password123!')
+                  setMockRole('customer')
+                }}
+                className={`p-2 rounded-lg border text-left font-medium transition-all ${
+                  mockRole === 'customer'
+                    ? 'bg-[var(--primary)] text-white border-[var(--primary)] shadow-sm'
+                    : 'bg-[var(--surface)] text-[var(--ink)] border-[var(--border)] hover:border-[var(--primary)]'
+                }`}
+              >
+                🛒 Người mua (Buyer)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('seller@stockflow.b2b')
+                  setPassword('Password123!')
+                  setMockRole('seller')
+                }}
+                className={`p-2 rounded-lg border text-left font-medium transition-all ${
+                  mockRole === 'seller'
+                    ? 'bg-[var(--primary)] text-white border-[var(--primary)] shadow-sm'
+                    : 'bg-[var(--surface)] text-[var(--ink)] border-[var(--border)] hover:border-[var(--primary)]'
+                }`}
+              >
+                📦 Người bán (Seller)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('carrier@stockflow.b2b')
+                  setPassword('Password123!')
+                  setMockRole('carrier')
+                }}
+                className={`p-2 rounded-lg border text-left font-medium transition-all ${
+                  mockRole === 'carrier'
+                    ? 'bg-[var(--primary)] text-white border-[var(--primary)] shadow-sm'
+                    : 'bg-[var(--surface)] text-[var(--ink)] border-[var(--border)] hover:border-[var(--primary)]'
+                }`}
+              >
+                🚛 Vận tải (Carrier)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('host@stockflow.b2b')
+                  setPassword('Password123!')
+                  setMockRole('host')
+                }}
+                className={`p-2 rounded-lg border text-left font-medium transition-all ${
+                  mockRole === 'host'
+                    ? 'bg-[var(--primary)] text-white border-[var(--primary)] shadow-sm'
+                    : 'bg-[var(--surface)] text-[var(--ink)] border-[var(--border)] hover:border-[var(--primary)]'
+                }`}
+              >
+                👔 Điều phối (Host)
+              </button>
+            </div>
+          </div>
+
           <div className="form-group">
             <label htmlFor="email-input" className="sf-label">
               Email
