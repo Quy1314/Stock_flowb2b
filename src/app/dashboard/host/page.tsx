@@ -372,7 +372,7 @@ export default function HostDashboard() {
                         <div className="flex items-center gap-3.5 flex-wrap">
                           {req.status === 'submitted' && (
                             <button onClick={() => handleAssignCoordinator(req.id)} className="sf-btn sf-btn-secondary py-1.5 px-3 text-xs">
-                              Gán việc cho tôi
+                              {t('host_action.assign_me', lang)}
                             </button>
                           )}
                           {req.status === 'seller_confirmed' && (
@@ -382,7 +382,7 @@ export default function HostDashboard() {
                               }}
                               className="sf-btn sf-btn-primary py-1.5 px-3 text-xs"
                             >
-                              {t('action.quote', lang)}
+                              {t('host_action.input_quote', lang)}
                             </button>
                           )}
                           {req.status === 'quoted' && (
@@ -390,7 +390,7 @@ export default function HostDashboard() {
                               onClick={() => handleCreateOrder(req.id)}
                               className="sf-btn sf-btn-secondary py-1.5 px-3 text-xs bg-emerald-50 text-emerald-600 border border-emerald-200"
                             >
-                              Khởi tạo Đơn hàng (Order)
+                              {t('host_action.create_order', lang)}
                             </button>
                           )}
                         </div>
@@ -450,18 +450,18 @@ export default function HostDashboard() {
                             }}
                             className="text-xs text-[var(--primary)] underline"
                           >
-                            Xem biên lai
+                            {t('host_action.view_receipt', lang)}
                           </a>
                           <button
                             onClick={() => handleConfirmPayment(ord.id)}
                             className="sf-btn sf-btn-primary py-1 px-3 text-xs font-bold"
                           >
-                            Xác nhận đã nhận tiền
+                            {t('host_action.confirm_payment', lang)}
                           </button>
                         </div>
                       )}
                       {ord.status === 'paid' && (
-                        <span className="text-xs text-[var(--primary)] font-bold">✔️ Đã xác nhận</span>
+                        <span className="text-xs text-[var(--primary)] font-bold">✔️ {t('status.approved', lang)}</span>
                       )}
                     </td>
                   </tr>
@@ -515,7 +515,7 @@ export default function HostDashboard() {
                         }}
                         className="sf-btn sf-btn-secondary py-1.5 px-3 text-xs"
                       >
-                        Cập nhật
+                        {t('host_action.update_shipment', lang)}
                       </button>
                     </td>
                   </tr>

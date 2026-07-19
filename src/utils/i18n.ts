@@ -155,7 +155,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'carrier_ui.status_updated': 'Trạng thái:',
     'carrier_ui.update_pod_btn': '📷 Cập nhật Ảnh Giao hàng (POD)',
 
-    // Host Page UI
+    // Host Page UI & Actions
     'host_ui.welcome_title': 'Chào mừng, Host Điều Phối!',
     'host_ui.pending_listings': 'Tin đăng chờ duyệt',
     'host_ui.pending_orders': 'Đơn mua chờ xử lý',
@@ -169,6 +169,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'host_ui.quote_carrier': 'Hãng vận tải đảm nhận',
     'host_ui.quote_duration': 'Thời gian dự kiến',
     'host_ui.quote_submit_btn': 'Gửi báo giá tới Buyer',
+    'host_action.assign_me': 'Gán việc cho tôi',
+    'host_action.create_order': 'Khởi tạo Đơn hàng (Order)',
+    'host_action.view_receipt': 'Xem biên lai',
+    'host_action.confirm_payment': 'Xác nhận đã nhận tiền',
+    'host_action.update_shipment': 'Cập nhật',
+    'host_action.input_quote': 'Nhập cước Logistics',
 
     // Auth & Login Page
     'auth.login_title': 'Đăng nhập',
@@ -391,7 +397,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'carrier_ui.status_updated': 'ステータス:',
     'carrier_ui.update_pod_btn': '📷 配送完了証明 (POD) を登録',
 
-    // Host Page UI
+    // Host Page UI & Actions
     'host_ui.welcome_title': 'ようこそ、コーディネーター様!',
     'host_ui.pending_listings': '承認待ちの出品',
     'host_ui.pending_orders': '処理待ちの購入注文',
@@ -405,6 +411,12 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
     'host_ui.quote_carrier': '担当配送業者',
     'host_ui.quote_duration': '予想所要時間',
     'host_ui.quote_submit_btn': 'バイヤーに見積もりを送信',
+    'host_action.assign_me': '自分に割り当てる',
+    'host_action.create_order': '注文を作成 (Order)',
+    'host_action.view_receipt': '領収書を表示',
+    'host_action.confirm_payment': '入金確認',
+    'host_action.update_shipment': 'ステータス更新',
+    'host_action.input_quote': '運賃見積もり入力',
 
     // Auth & Login Page
     'auth.login_title': 'ログイン',
