@@ -4,40 +4,34 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { isSupabaseConfigured } from '@/utils/envCheck'
+import { getLanguage, setLanguage, t, Language } from '@/utils/i18n'
 
 /** Tab definitions per role */
-const ROLE_TABS: Record<string, { id: string; label: string; icon: string }[]> = {
+const ROLE_TAB_KEYS: Record<string, { id: string; key: string; icon: string }[]> = {
   seller: [
-    { id: 'overview', label: 'Tổng quan', icon: '📊' },
-    { id: 'listings', label: 'Sản phẩm của tôi', icon: '📦' },
-    { id: 'requests', label: 'Đơn mua từ khách', icon: '📥' },
-    { id: 'warehouses', label: 'Cài đặt Kho', icon: '⚙️' },
+    { id: 'overview', key: 'tab.overview', icon: '📊' },
+    { id: 'listings', key: 'tab.listings', icon: '📦' },
+    { id: 'requests', key: 'tab.requests', icon: '📥' },
+    { id: 'warehouses', key: 'tab.warehouses', icon: '⚙️' },
   ],
   customer: [
-    { id: 'overview', label: 'Tổng quan', icon: '📊' },
-    { id: 'marketplace', label: 'Chợ sỉ B2B', icon: '🛒' },
-    { id: 'requests', label: 'Yêu cầu & Đơn hàng', icon: '📦' },
-    { id: 'warehouses', label: 'Quản lý Kho nhận', icon: '⚙️' },
+    { id: 'overview', key: 'tab.overview', icon: '📊' },
+    { id: 'marketplace', key: 'tab.marketplace', icon: '🛒' },
+    { id: 'requests', key: 'tab.customer_requests', icon: '📦' },
+    { id: 'warehouses', key: 'tab.customer_warehouses', icon: '⚙️' },
   ],
   host: [
-    { id: 'overview', label: 'Tổng quan', icon: '📊' },
-    { id: 'moderation', label: 'Duyệt tin đăng', icon: '🔎' },
-    { id: 'logistics', label: 'Logistics Center', icon: '🚚' },
-    { id: 'orders', label: 'Đơn hàng (Orders)', icon: '🛒' },
-    { id: 'shipments', label: 'Vận đơn (Shipments)', icon: '📈' },
+    { id: 'overview', key: 'tab.overview', icon: '📊' },
+    { id: 'moderation', key: 'tab.moderation', icon: '🔎' },
+    { id: 'logistics', key: 'tab.logistics', icon: '🚚' },
+    { id: 'orders', key: 'tab.orders', icon: '🛒' },
+    { id: 'shipments', key: 'tab.shipments', icon: '📈' },
   ],
   carrier: [
-    { id: 'overview', label: 'Tổng quan', icon: '📊' },
-    { id: 'trips', label: 'Yêu cầu Vận chuyển', icon: '🚚' },
-    { id: 'capacity', label: 'Cập nhật Năng lực', icon: '⚙️' },
+    { id: 'overview', key: 'tab.overview', icon: '📊' },
+    { id: 'trips', key: 'tab.trips', icon: '🚚' },
+    { id: 'capacity', key: 'tab.capacity', icon: '⚙️' },
   ],
-}
-
-const ROLE_LABELS: Record<string, string> = {
-  seller: 'Người bán (Seller)',
-  customer: 'Người mua (Customer)',
-  host: 'Điều phối viên (Host)',
-  carrier: 'Đơn vị vận tải (Carrier)',
 }
 
 export default function DashboardLayout({
@@ -53,6 +47,21 @@ export default function DashboardLayout({
   const [activeTab, setActiveTab] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [lang, setLangState] = useState<Language>('vi')
+
+  useEffect(() => {
+    setLangState(getLanguage())
+    const handleLangChange = (e: any) => {
+      setLangState(e.detail || getLanguage())
+    }
+    window.addEventListener('stockflow-lang-changed', handleLangChange)
+    return () => window.removeEventListener('stockflow-lang-changed', handleLangChange)
+  }, [])
+
+  const handleSelectLanguage = (newLang: Language) => {
+    setLanguage(newLang)
+    setLangState(newLang)
+  }
 
   useEffect(() => {
     const pathParts = pathname.split('/')
@@ -114,7 +123,8 @@ export default function DashboardLayout({
     }
   }
 
-  const tabs = role ? (ROLE_TABS[role] || []) : []
+  const rawTabs = role ? (ROLE_TAB_KEYS[role] || []) : []
+  const roleLabelKey = role === 'customer' ? 'role.buyer' : role ? `role.${role}` : ''
 
   return (
     <div className="sf-dashboard-shell">
@@ -156,18 +166,19 @@ export default function DashboardLayout({
         </div>
 
         <nav className="sf-sidebar__nav">
-          {tabs.map((tab) => {
+          {rawTabs.map((tab) => {
             const isActive = activeTab === tab.id
+            const label = t(tab.key, lang)
             return (
               <button
                 key={tab.id}
                 type="button"
                 onClick={() => handleTabClick(tab.id)}
-                title={isCollapsed ? tab.label : undefined}
+                title={isCollapsed ? label : undefined}
                 className={`sf-sidebar__item ${isActive ? 'sf-sidebar__item--active' : ''}`}
               >
                 <span className="sf-sidebar__item-icon">{tab.icon}</span>
-                {!isCollapsed && <span className="sf-sidebar__item-label">{tab.label}</span>}
+                {!isCollapsed && <span className="sf-sidebar__item-label">{label}</span>}
               </button>
             )
           })}
@@ -194,8 +205,28 @@ export default function DashboardLayout({
             </div>
             <div>
               <h4 className="sf-topbar__company">{companyName}</h4>
-              <span className="sf-topbar__role">{role ? ROLE_LABELS[role] : ''}</span>
+              <span className="sf-topbar__role">{roleLabelKey ? t(roleLabelKey, lang) : ''}</span>
             </div>
+          </div>
+
+          {/* Language Switcher */}
+          <div className="flex items-center gap-1 bg-[var(--surface-sunken)] border border-[var(--border)] rounded-lg p-1 text-xs">
+            <button
+              type="button"
+              onClick={() => handleSelectLanguage('vi')}
+              className={`px-2 py-1 rounded font-bold transition-colors ${lang === 'vi' ? 'bg-[var(--primary)] text-white' : 'text-[var(--ink-secondary)]'}`}
+              title="Tiếng Việt"
+            >
+              🇻🇳 VI
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSelectLanguage('ja')}
+              className={`px-2 py-1 rounded font-bold transition-colors ${lang === 'ja' ? 'bg-[var(--primary)] text-white' : 'text-[var(--ink-secondary)]'}`}
+              title="日本語"
+            >
+              🇯🇵 JA
+            </button>
           </div>
 
           <button onClick={handleLogout} className="sf-topbar__logout">
@@ -215,7 +246,7 @@ export default function DashboardLayout({
               <polyline points="16 17 21 12 16 7" />
               <line x1="21" y1="12" x2="9" y2="12" />
             </svg>
-            <span className="hidden sm:inline">Đăng xuất</span>
+            <span className="hidden sm:inline">{t('action.logout', lang)}</span>
           </button>
         </header>
 

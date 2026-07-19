@@ -219,7 +219,7 @@ export default function RegisterPage() {
                 onChange={(e) => setRole(e.target.value as 'seller' | 'customer' | 'carrier')}
                 className="sf-select"
               >
-                <option value="customer">Người mua (Customer)</option>
+                <option value="customer">Người mua (Buyer)</option>
                 <option value="seller">Người bán (Seller)</option>
                 <option value="carrier">Đơn vị vận tải (Carrier)</option>
               </select>
