@@ -51,6 +51,7 @@ export default function DashboardLayout({
   const [userName, setUserName] = useState('Đang tải...')
   const [activeTab, setActiveTab] = useState('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)
 
   useEffect(() => {
     const pathParts = pathname.split('/')
@@ -104,6 +105,14 @@ export default function DashboardLayout({
     setSidebarOpen(false)
   }, [])
 
+  const toggleSidebar = () => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setSidebarOpen(!sidebarOpen)
+    } else {
+      setIsCollapsed(!isCollapsed)
+    }
+  }
+
   const tabs = role ? (ROLE_TABS[role] || []) : []
 
   return (
@@ -118,12 +127,23 @@ export default function DashboardLayout({
       )}
 
       {/* ── Sidebar ── */}
-      <aside className={`sf-sidebar ${sidebarOpen ? 'sf-sidebar--open' : ''}`}>
+      <aside className={`sf-sidebar ${sidebarOpen ? 'sf-sidebar--open' : ''} ${isCollapsed ? 'sf-sidebar--collapsed' : ''}`}>
         <div className="sf-sidebar__header">
           <Link href="/" className="sf-sidebar__brand">
             <span className="sf-sidebar__logo">SF</span>
-            StockFlow
+            {!isCollapsed && <span className="sf-sidebar__brand-text">StockFlow</span>}
           </Link>
+
+          {/* Desktop toggle button */}
+          <button
+            className="sf-sidebar__toggle hidden md:flex"
+            onClick={toggleSidebar}
+            title={isCollapsed ? 'Mở rộng menu' : 'Thu gọn menu'}
+            aria-label="Toggle Sidebar"
+          >
+            {isCollapsed ? '❯' : '❮'}
+          </button>
+
           {/* Mobile close */}
           <button
             className="sf-sidebar__close md:hidden"
@@ -142,10 +162,11 @@ export default function DashboardLayout({
                 key={tab.id}
                 type="button"
                 onClick={() => handleTabClick(tab.id)}
+                title={isCollapsed ? tab.label : undefined}
                 className={`sf-sidebar__item ${isActive ? 'sf-sidebar__item--active' : ''}`}
               >
                 <span className="sf-sidebar__item-icon">{tab.icon}</span>
-                {tab.label}
+                {!isCollapsed && <span className="sf-sidebar__item-label">{tab.label}</span>}
               </button>
             )
           })}
@@ -156,11 +177,12 @@ export default function DashboardLayout({
       <div className="sf-main-area">
         {/* Top Header */}
         <header className="sf-topbar">
-          {/* Mobile hamburger */}
+          {/* Topbar toggle hamburger button (works for desktop & mobile) */}
           <button
-            className="sf-topbar__hamburger md:hidden"
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Mở menu"
+            className="sf-topbar__hamburger"
+            onClick={toggleSidebar}
+            aria-label="Thu gọn / Mở menu"
+            title="Thu gọn / Mở menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>

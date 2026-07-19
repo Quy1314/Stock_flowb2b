@@ -607,7 +607,49 @@ a:hover {
     position: sticky;
     transform: translateX(0);
     flex-shrink: 0;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                padding 0.3s ease;
   }
+
+  .sf-sidebar--collapsed {
+    width: 4.75rem;
+    padding-inline: 0.75rem;
+  }
+
+  .sf-sidebar--collapsed .sf-sidebar__header {
+    justify-content: center;
+  }
+
+  .sf-sidebar--collapsed .sf-sidebar__item {
+    justify-content: center;
+    padding: 0.75rem 0;
+  }
+
+  .sf-sidebar--collapsed .sf-sidebar__item-icon {
+    font-size: 1.2rem;
+    width: auto;
+    margin: 0;
+  }
+}
+
+.sf-sidebar__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.sf-sidebar__toggle:hover {
+  background: var(--primary-subtle);
+  color: var(--primary-dark);
 }
 
 .sf-sidebar-overlay {
