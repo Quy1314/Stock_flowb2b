@@ -13,6 +13,7 @@ import {
   mockUpdateOrderStatus,
 } from '@/utils/mockStore'
 import { getLanguage, t, Language } from '@/utils/i18n'
+import { printB2BInvoice, exportToCSV } from '@/utils/exportDocs'
 
 export default function CustomerDashboard() {
   const [activeTab, setActiveTab] = useState<'overview' | 'marketplace' | 'requests' | 'warehouses'>('overview')
@@ -235,6 +236,37 @@ export default function CustomerDashboard() {
             </div>
           </div>
 
+          {/* 📊 Visual Analytics Chart (Option 1) */}
+          <div className="sf-card border border-[var(--border)]">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-base flex items-center gap-2">
+                <span>📊 {lang === 'ja' ? '購買支出と節約推移 (Purchase & Savings Analytics)' : 'Phân tích Chi phí Thu mua & Ngân sách Tiết kiệm'}</span>
+              </h3>
+              <span className="text-xs text-[var(--ink-secondary)]">2026 (Q1 - Q3)</span>
+            </div>
+
+            <div className="h-44 w-full flex items-end gap-3 pt-6 pb-2 px-2 border-b border-[var(--border)]">
+              {[
+                { month: 'T1', val: 55, text: '55,000' },
+                { month: 'T2', val: 75, text: '75,000' },
+                { month: 'T3', val: 60, text: '60,000' },
+                { month: 'T4', val: 90, text: '90,000' },
+                { month: 'T5', val: 80, text: '80,000' },
+                { month: 'T6', val: 100, text: '100,000' },
+                { month: 'T7', val: 120, text: '120,000' },
+              ].map((bar, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1 group h-full justify-end">
+                  <span className="text-[10px] font-mono text-[var(--ink-muted)] opacity-0 group-hover:opacity-100 transition-opacity">{bar.text}</span>
+                  <div
+                    className="w-full bg-[var(--accent)] rounded-t-md transition-all duration-500 hover:bg-emerald-600 shadow-sm"
+                    style={{ height: `${bar.val}%` }}
+                  />
+                  <span className="text-xs font-medium text-[var(--ink-secondary)]">{bar.month}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="flex gap-4">
             <button onClick={() => { window.location.hash = '#marketplace' }} className="sf-btn sf-btn-primary">
               🛒 Khám phá Chợ sỉ B2B
@@ -414,7 +446,30 @@ export default function CustomerDashboard() {
                           </button>
                         )}
                         {req.status === 'awaiting_payment' && (
-                          <span className="text-xs text-[var(--ink-muted)]">Chờ duyệt thanh toán</span>
+                          <span className="text-xs text-[var(--ink-muted)] block mb-1">Chờ duyệt thanh toán</span>
+                        )}
+                        {(req.status === 'converted_to_order' || req.status === 'completed' || req.status === 'buyer_confirmed' || req.status === 'awaiting_payment') && (
+                          <button
+                            onClick={() => printB2BInvoice({
+                              orderId: `INV-${req.id.substring(0, 8).toUpperCase()}`,
+                              date: new Date().toISOString().slice(0, 10),
+                              sellerCompany: req.seller_name || 'ABC Packaging JSC',
+                              buyerCompany: req.buyer_company || 'Minh Phong Retail Co.',
+                              productName: req.product_name,
+                              quantity: req.requested_quantity,
+                              unit: 'cái',
+                              unitPrice: req.proposed_unit_price,
+                              shippingFee: req.shipping_fee || 0,
+                              loadingFee: req.loading_fee || 0,
+                              countFee: req.count_fee || 0,
+                              totalAmount: (req.requested_quantity * req.proposed_unit_price) + (req.shipping_fee || 0) + (req.loading_fee || 0) + (req.count_fee || 0),
+                              paymentStatus: req.status === 'converted_to_order' ? 'Đã hoàn thành' : 'Đã xác nhận',
+                              carrier: req.carrier || 'Vận tải Minh Phát',
+                            })}
+                            className="sf-btn sf-btn-ghost py-1 px-2 text-xs border border-[var(--border)] text-[var(--primary)] font-bold mt-1"
+                          >
+                            📄 In Hóa đơn B2B
+                          </button>
                         )}
                       </td>
                     </tr>

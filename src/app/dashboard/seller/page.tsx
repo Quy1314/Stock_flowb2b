@@ -341,6 +341,37 @@ export default function SellerDashboard() {
             </div>
           </div>
 
+          {/* 📊 Visual Analytics Chart (Option 1) */}
+          <div className="sf-card border border-[var(--border)]">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-base flex items-center gap-2">
+                <span>📊 {lang === 'ja' ? '在庫処分と売上推移 (Clearance Analytics)' : 'Phân tích Giải phóng Kho & Biến động Doanh số'}</span>
+              </h3>
+              <span className="text-xs text-[var(--ink-secondary)]">2026 (Q1 - Q3)</span>
+            </div>
+
+            <div className="h-44 w-full flex items-end gap-3 pt-6 pb-2 px-2 border-b border-[var(--border)]">
+              {[
+                { month: 'T1', val: 45, text: '45,000' },
+                { month: 'T2', val: 65, text: '65,000' },
+                { month: 'T3', val: 50, text: '50,000' },
+                { month: 'T4', val: 85, text: '85,000' },
+                { month: 'T5', val: 70, text: '70,000' },
+                { month: 'T6', val: 95, text: '95,000' },
+                { month: 'T7', val: 110, text: '110,000' },
+              ].map((bar, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1 group h-full justify-end">
+                  <span className="text-[10px] font-mono text-[var(--ink-muted)] opacity-0 group-hover:opacity-100 transition-opacity">{bar.text}</span>
+                  <div
+                    className="w-full bg-[var(--primary)] rounded-t-md transition-all duration-500 hover:bg-[var(--primary-dark)] shadow-sm"
+                    style={{ height: `${bar.val}%` }}
+                  />
+                  <span className="text-xs font-medium text-[var(--ink-secondary)]">{bar.month}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <div className="flex gap-4">
             <button
               onClick={() => {

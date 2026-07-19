@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     "supply chain",
     "StockFlow",
   ],
+  manifest: "/manifest.json",
   openGraph: {
     title: "StockFlow B2B — Nền tảng kết nối Người Bán & Người Mua",
     description:

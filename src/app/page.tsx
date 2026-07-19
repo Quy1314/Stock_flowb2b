@@ -1,6 +1,24 @@
+'use client'
+
+import React, { useEffect, useState } from 'react'
 import Link from "next/link";
+import { getLanguage, setLanguage, t, Language } from "@/utils/i18n";
 
 export default function Home() {
+  const [lang, setLangState] = useState<Language>('vi')
+
+  useEffect(() => {
+    setLangState(getLanguage())
+    const handleLangChange = (e: any) => setLangState(e.detail || getLanguage())
+    window.addEventListener('stockflow-lang-changed', handleLangChange)
+    return () => window.removeEventListener('stockflow-lang-changed', handleLangChange)
+  }, [])
+
+  const handleSelectLanguage = (newLang: Language) => {
+    setLanguage(newLang)
+    setLangState(newLang)
+  }
+
   return (
     <>
       {/* ── Hero ──────────────────────────────────────────── */}
@@ -45,15 +63,33 @@ export default function Home() {
           </Link>
 
           <div className="flex items-center gap-3">
+            {/* Language Switcher */}
+            <div className="flex items-center gap-1 bg-[var(--surface-sunken)] border border-[var(--border)] rounded-lg p-1 text-xs">
+              <button
+                type="button"
+                onClick={() => handleSelectLanguage('vi')}
+                className={`px-2 py-1 rounded font-bold transition-colors ${lang === 'vi' ? 'bg-[var(--primary)] text-white' : 'text-[var(--ink-secondary)]'}`}
+              >
+                🇻🇳 VI
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSelectLanguage('ja')}
+                className={`px-2 py-1 rounded font-bold transition-colors ${lang === 'ja' ? 'bg-[var(--primary)] text-white' : 'text-[var(--ink-secondary)]'}`}
+              >
+                🇯🇵 JA
+              </button>
+            </div>
+
             <Link
               href="/login"
               className="sf-btn sf-btn-ghost"
               style={{ fontSize: "0.875rem" }}
             >
-              Đăng nhập
+              {lang === 'ja' ? 'ログイン' : 'Đăng nhập'}
             </Link>
             <Link href="/register" className="sf-btn sf-btn-primary">
-              Bắt đầu miễn phí
+              {lang === 'ja' ? '無料で始める' : 'Bắt đầu miễn phí'}
             </Link>
           </div>
         </nav>

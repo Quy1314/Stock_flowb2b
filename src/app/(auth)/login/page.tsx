@@ -1,18 +1,32 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { loginUser } from '@/app/actions/auth'
+import { getLanguage, setLanguage, t, Language } from '@/utils/i18n'
 
 export default function LoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [mockRole, setMockRole] = useState<'none' | 'seller' | 'customer' | 'host' | 'carrier'>('none')
+  const [lang, setLangState] = useState<Language>('vi')
 
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setLangState(getLanguage())
+    const handleLangChange = (e: any) => setLangState(e.detail || getLanguage())
+    window.addEventListener('stockflow-lang-changed', handleLangChange)
+    return () => window.removeEventListener('stockflow-lang-changed', handleLangChange)
+  }, [])
+
+  const handleSelectLanguage = (newLang: Language) => {
+    setLanguage(newLang)
+    setLangState(newLang)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,7 +88,24 @@ export default function LoginPage() {
           boxShadow: '0 20px 40px oklch(0.18 0.02 180 / 0.08)',
         }}
       >
-        <header className="mb-6 text-center">
+        <header className="mb-6 text-center relative">
+          <div className="absolute top-0 right-0 flex items-center gap-1 bg-[var(--surface-sunken)] border border-[var(--border)] rounded-lg p-1 text-[10px]">
+            <button
+              type="button"
+              onClick={() => handleSelectLanguage('vi')}
+              className={`px-1.5 py-0.5 rounded font-bold transition-colors ${lang === 'vi' ? 'bg-[var(--primary)] text-white' : 'text-[var(--ink-secondary)]'}`}
+            >
+              🇻🇳 VI
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSelectLanguage('ja')}
+              className={`px-1.5 py-0.5 rounded font-bold transition-colors ${lang === 'ja' ? 'bg-[var(--primary)] text-white' : 'text-[var(--ink-secondary)]'}`}
+            >
+              🇯🇵 JA
+            </button>
+          </div>
+
           <Link
             href="/"
             className="inline-flex items-center gap-3 text-2xl font-bold no-underline transition-transform duration-200 hover:scale-105"
@@ -102,7 +133,7 @@ export default function LoginPage() {
               letterSpacing: '-0.02em',
             }}
           >
-            Đăng nhập
+            {lang === 'ja' ? 'ログイン' : 'Đăng nhập'}
           </h1>
           <p
             className="mx-auto mt-2 text-sm"

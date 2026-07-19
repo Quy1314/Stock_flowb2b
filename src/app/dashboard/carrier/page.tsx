@@ -171,6 +171,37 @@ export default function CarrierDashboard() {
             </div>
           </div>
 
+          {/* 📊 Visual Analytics Chart (Option 1) */}
+          <div className="sf-card border border-[var(--border)]">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-base flex items-center gap-2">
+                <span>📊 {lang === 'ja' ? '運送実績と稼働率 (Fleet Capacity Analytics)' : 'Phân tích Tải trọng & Hiệu suất Vận chuyển'}</span>
+              </h3>
+              <span className="text-xs text-[var(--ink-secondary)]">2026 (Q1 - Q3)</span>
+            </div>
+
+            <div className="h-44 w-full flex items-end gap-3 pt-6 pb-2 px-2 border-b border-[var(--border)]">
+              {[
+                { month: 'T1', val: 50, text: '5,200 km' },
+                { month: 'T2', val: 70, text: '7,100 km' },
+                { month: 'T3', val: 65, text: '6,800 km' },
+                { month: 'T4', val: 85, text: '8,900 km' },
+                { month: 'T5', val: 90, text: '9,400 km' },
+                { month: 'T6', val: 105, text: '11,000 km' },
+                { month: 'T7', val: 120, text: '12,500 km' },
+              ].map((bar, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1 group h-full justify-end">
+                  <span className="text-[10px] font-mono text-[var(--ink-muted)] opacity-0 group-hover:opacity-100 transition-opacity">{bar.text}</span>
+                  <div
+                    className="w-full bg-cyan-600 rounded-t-md transition-all duration-500 hover:bg-cyan-700 shadow-sm"
+                    style={{ height: `${bar.val * 0.7}%` }}
+                  />
+                  <span className="text-xs font-medium text-[var(--ink-secondary)]">{bar.month}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Ongoing trip control panel */}
           <section className="sf-card bg-[var(--surface-sunken)]">
             <h2 className="text-base font-extrabold mb-3">Chuyến hàng đang đảm nhận: SF-005</h2>
